@@ -335,6 +335,7 @@ bool AudioDecoder::SetFile(const std::string &_filename)
   // conda-forge with 5.0.0 h594f047_1 this is not happening for some reason.
   // As temporary workaround, we copy directly the data structures, taking the code from
   // https://github.com/FFmpeg/FFmpeg/blob/n5.0/libavcodec/codec_par.c#L120
+#if LIBAVFORMAT_VERSION_MAJOR < 61
   AVCodecParameters* par = this->formatCtx->streams[this->audioStream]->codecpar;
   this->codecCtx->sample_fmt       = static_cast<AVSampleFormat>(par->format);
   this->codecCtx->channel_layout   = par->channel_layout;
@@ -346,6 +347,7 @@ bool AudioDecoder::SetFile(const std::string &_filename)
   this->codecCtx->initial_padding  = par->initial_padding;
   this->codecCtx->trailing_padding = par->trailing_padding;
   this->codecCtx->seek_preroll     = par->seek_preroll;
+#endif
 
   // It would be better to just define codec as const AVCodec *,
   // but that is not done to avoid ABI problem. Anyhow, as codec

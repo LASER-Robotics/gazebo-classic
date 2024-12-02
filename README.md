@@ -6,7 +6,9 @@ Gazebo - A dynamic multi-robot simulator
 > A new version of Gazebo (formerly known as Ignition) is now available. Please visit https://gazebosim.org or https://github.com/gazebosim/gz-sim to learn more.
  
 > [!WARNING]
-> ### Gazebo Classic will reach End-Of-Life in [January 2025](https://classic.gazebosim.org/#collapseVersion11_0). Users are highly encouraged to migrate to the new Gazebo using our [migration guides](https://gazebosim.org/docs/latest/gazebo_classic_migration/)
+> ### Gazebo Classic will reach End-Of-Life on [January 31st, 2025](https://classic.gazebosim.org/#collapseVersion11_0).
+> Users are highly encouraged to migrate to the new Gazebo using our [migration guides](https://gazebosim.org/docs/latest/gazebo_classic_migration/)
+> Additional details can be found in [our official announcement](https://community.gazebosim.org/t/gazebo-classic-and-citadel-end-of-life/3242). 
 
 This is the [Gazebo Classic](http://classic.gazebosim.org) simulator.  Gazebo simulates multiple robots in a
 3D environment, with extensive dynamic interaction between objects.

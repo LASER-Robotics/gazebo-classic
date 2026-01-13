@@ -19,6 +19,7 @@ sudo apt install -y build-essential cmake pkg-config \
     uuid-dev \
     libfreeimage-dev \
     libtinyxml2-dev \
+    libtinyxml-dev \
     libtbb-dev \
     libogre-1.9-dev \
     libgts-dev \
@@ -35,9 +36,26 @@ sudo apt install -y build-essential cmake pkg-config \
     libudev-dev \
     libgtk-3-dev \
     libglfw3-dev \
-    libglu1-mesa-dev
+    libglu1-mesa-dev \
+    libqwt-qt5-dev \
+    libgraphviz-dev \
+    xsltproc
 
 cd $GZ_DIR
+
+echo " Verificando e apagando pastas antigas..."
+    
+    # Lista explícita de tudo que será instalado nessa pasta
+    rm -rf ign-cmake
+    rm -rf ign-math
+    rm -rf ign-tools
+    rm -rf ign-common
+    rm -rf ign-msgs
+    rm -rf gz-fuel-tools
+    rm -rf ign-transport
+    rm -rf sdformat
+    
+    echo " Limpeza concluída. Começando do zero."
 
 #============================================
 #               IGNITION_CMAKE
@@ -67,25 +85,6 @@ echo "IGNITION_MATH"
 git clone https://github.com/gazebosim/gz-math.git -b ign-math6 ign-math
 mkdir ign-math/build
 cd ign-math/build
-
-rm -rf *
-
-cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local
-
-make -j$(nproc)
-sudo make install
-
-cd $GZ_DIR
-
-#=============================================
-#           GZ-FUEL-TOOLS
-#=============================================
-
-echo "GZ-FUEL-TOOLS"
-
-git clone https://github.com/gazebosim/gz-fuel-tools.git -b ign-fuel-tools4
-mkdir gz-fuel-tools/build
-cd gz-fuel-tools/build
 
 rm -rf *
 
@@ -153,6 +152,25 @@ sudo make install
 
 cd $GZ_DIR
 
+#=============================================
+#           GZ-FUEL-TOOLS
+#=============================================
+
+echo "GZ-FUEL-TOOLS"
+
+git clone https://github.com/gazebosim/gz-fuel-tools.git -b ign-fuel-tools4
+mkdir gz-fuel-tools/build
+cd gz-fuel-tools/build
+
+rm -rf *
+
+cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local
+
+make -j$(nproc)
+sudo make install
+
+cd $GZ_DIR
+
 #============================================
 #           IGNITION_TRANSPORT
 #============================================
@@ -197,13 +215,17 @@ cd $BASE_DIR
 
 echo "AUTODIFF"
 
+rm -rf autodiff
+
 git clone https://github.com/autodiff/autodiff.git
 mkdir autodiff/build
 cd autodiff/build
 
 rm -rf *
 
-cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local
+cmake .. -DCMAKE_BUILD_TYPE=Release \
+         -DCMAKE_INSTALL_PREFIX=/usr/local \
+         -DAUTODIFF_BUILD_PYTHON=OFF 
 
 make -j$(nproc)
 sudo make install
@@ -213,6 +235,10 @@ cd $BASE_DIR
 #============================================
 #               REALSENSE
 #============================================
+
+echo "REALSENSE"
+
+rm -rf librealsense
 
 git clone https://github.com/IntelRealSense/librealsense.git
 cd librealsense
@@ -237,6 +263,8 @@ cd $THIS_DIR
 #==========================================
 
 echo "GAZEBO-CLASSIC"
+
+rm -rf build
 
 mkdir -p build
 cd build

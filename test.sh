@@ -116,7 +116,7 @@ if [ ! -f "$TARGET_FILE" ]; then
 fi
 
 if grep -q "$ADDITION" "$TARGET_FILE"; then
-
+    echo "O arquivo session.yml já está configurado"
 else
     # 3. Aplica a alteração usando SED
     sed -i "s|pre_window: |pre_window: $ADDITION |" "$TARGET_FILE"

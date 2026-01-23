@@ -1,5 +1,5 @@
 sudo apt update
-sudo apt install python3-pip python3-vcstool python3-colcon-common-extensions git
+sudo apt install python3-pip python3-vcstool python3-colcon-common-extensions git libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev gstreamer1.0-plugins-bad gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-ugly
 
 pip install gitman inputs pyyaml --break-system-packages
 
@@ -30,6 +30,43 @@ if [ ! -f "/usr/local/bin/MicroXRCEAgent" ]; then
     sudo make install
     sudo ldconfig /usr/local/lib/
 fi
+
+export MAKEFLAGS=-j4
+
+# Variáveis do Drone
+export UAV_NAME="uav1"
+export UAV_TYPE="lr7pro"
+export REAL_UAV="false"
+
+# Configurações de Log e Rede ROS 2 (Seus adicionais)
+export COLCON_LOG_LEVEL=30
+export RCUTILS_COLORIZED_OUTPUT=1
+export RCUTILS_LOGGING_BUFFERED_STREAM=1
+export RCUTILS_CONSOLE_OUTPUT_FORMAT='[{severity}] [{time}] [{name}]: {message} ({function_name}() at {file_name}:{line_number})'
+export PYTHONWARNINGS='ignore:::setuptools.command.install,ignore:::setuptools.command.easy_install,ignore:::pkg_resources'
+export ROS_DOMAIN_ID=168
+export ROS_LOCALHOST_ONLY=0
+
+# Configuração do Acados
+export ACADOS_SOURCE_DIR="$HOME/laser_uav_system_ws/src/laser_uav_controllers/acados"
+# Acados
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:"$HOME/laser_uav_system_ws/src/laser_uav_controllers/acados/lib"
+
+# Configuração do Gazebo + PX4
+# PX4 compilado
+PX4_BUILD_DIR="$HOME/git/laser_uav_system/.gitman/px4_firmware-ROS2-/build/px4_sitl_default/build_gazebo-classic"
+PX4_TOOLS_DIR="$HOME/git/laser_uav_system/.gitman/px4_firmware-ROS2-/Tools/simulation/gazebo-classic/sitl_gazebo-classic"
+
+# plugins do Gazebo
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PX4_BUILD_DIR
+export GAZEBO_PLUGIN_PATH=$GAZEBO_PLUGIN_PATH:$PX4_BUILD_DIR
+
+# modelos 3D (Drone + Mundo)
+export GAZEBO_MODEL_PATH=$GAZEBO_MODEL_PATH:$PX4_TOOLS_DIR/models:$HOME/laser_uav_system_ws/src/laser_uav_simulation/models:$HOME/laser_uav_system_ws/src/laser_uav_simulation/core/models
+
+
+# Source do ROS
+source /opt/ros/jazzy/setup.bash
 
 if ! grep -q "Configurações Laser UAV System" ~/.bashrc; then
     cat <<'EOF' >> ~/.bashrc
@@ -70,6 +107,7 @@ export GAZEBO_MODEL_PATH=$GAZEBO_MODEL_PATH:$PX4_TOOLS_DIR/models:$HOME/laser_ua
 
 # Source do Workspace ROS
 source ~/laser_uav_system_ws/install/setup.bash
+source ~/gazebo_env.sh
 EOF
 fi
 
@@ -79,11 +117,17 @@ ACADOS_LIB="$HOME/laser_uav_system_ws/src/laser_uav_controllers/acados/lib/libac
 if [ ! -f "$ACADOS_LIB" ]; then
     cd ~/laser_uav_system_ws/src/laser_uav_controllers/acados
 
+    git submodule update --recursive --init
+
     rm -rf build
     mkdir build
     cd build
 
-    cmake -DACADOS_WITH_QPOASES=ON -DCMAKE_INSTALL_PREFIX=".." ..
+    cmake -DACADOS_WITH_QPOASES=ON \
+          -DACADOS_WITH_OSQP=OFF \
+          -DACADOS_INSTALL_DIR=".." \
+          -DBUILD_SHARED_LIBS=ON \
+          ..
 
     make install -j4
 
@@ -91,15 +135,15 @@ fi
 
 PX4_BIN="$HOME/git/laser_uav_system/.gitman/px4_firmware-ROS2-/build/px4_sitl_default/bin/px4"
 if [ ! -f "$PX4_BIN" ]; then
-    pip install --user kconfiglib jsonschema future "empy==3.3.4" packaging toml numpy --break-system-packages
+    pip install --user symforce pyros-genmsg lxml kconfiglib jsonschema future "empy==3.3.4" packaging toml numpy jinja2 --break-system-packages
 
     cd ~/git/laser_uav_system/.gitman/px4_firmware-ROS2-
 
-    make clean
     rm -rf build
+    make clean
 
-    DONT_RUN=1 make px4_sitl_default
-    DONT_RUN=1 make px4_sitl_default gazebo-classic
+    DONT_RUN=1 make px4_sitl_default -j$(nproc)
+    DONT_RUN=1 make px4_sitl_default gazebo-classic -j$(nproc)
 fi
 
 cd $HOME/laser_uav_system_ws/src
@@ -129,5 +173,7 @@ fi
 cd $HOME/laser_uav_system_ws
 
 colcon build --symlink-install --packages-up-to gazebo_ros_pkgs
+
+source install/setup.bash
 
 colcon build --symlink-install

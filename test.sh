@@ -1,9 +1,8 @@
 sudo apt update
-sudo apt install python3-pip python3-vcstool python3-colcon-common-extensions git libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev gstreamer1.0-plugins-bad gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-ugly
+sudo apt install python3-pip python3-vcstool python3-colcon-common-extensions git libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev gstreamer1.0-plugins-bad gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-ugly  ros-jazzy-eigen3-cmake-module ros-jazzy-mavlink ros-jazzy-pcl-conversions ros-jazzy-ros2bag ros-jazzy-rosbag2-storage-mcap libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libunwind-dev libgazebo-dev gstreamer1.0-plugins-bad gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-ugly
 
-pip install gitman inputs pyyaml --break-system-packages
+pip install --user gitman inputs pyyaml  symforce pyros-genmsg lxml kconfiglib jsonschema future "empy==3.3.4" packaging toml numpy jinja2 --break-system-packages
 
-sudo apt install ros-jazzy-eigen3-cmake-module ros-jazzy-mavlink ros-jazzy-pcl-conversions ros-jazzy-ros2bag ros-jazzy-rosbag2-storage-mcap libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libunwind-dev libgazebo-dev gstreamer1.0-plugins-bad gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-ugly
 
 export PATH=$PATH:$HOME/.local/bin
 
@@ -17,9 +16,7 @@ cd $HOME/laser_uav_system_ws/src
 
 ln -sf $HOME/git/laser_uav_system/ros_packages/* .
 
-rm -rf px4_firmware 
-rm -rf micro_xrce_dds_agent 
-
+rm -rf px4_firmware micro_xrce_dds_agent 
 
 if [ ! -f "/usr/local/bin/MicroXRCEAgent" ]; then
     cd $HOME/git/laser_uav_system/ros_packages/micro_xrce_dds_agent
@@ -31,42 +28,54 @@ if [ ! -f "/usr/local/bin/MicroXRCEAgent" ]; then
     sudo ldconfig /usr/local/lib/
 fi
 
-export MAKEFLAGS=-j4
+ACADOS_LIB="$HOME/laser_uav_system_ws/src/laser_uav_controllers/acados/lib/libacados.so"
+if [ ! -f "$ACADOS_LIB" ]; then
+    cd ~/laser_uav_system_ws/src/laser_uav_controllers/acados
 
-# Variáveis do Drone
-export UAV_NAME="uav1"
-export UAV_TYPE="lr7pro"
-export REAL_UAV="false"
+    git submodule update --recursive --init
 
-# Configurações de Log e Rede ROS 2 (Seus adicionais)
-export COLCON_LOG_LEVEL=30
-export RCUTILS_COLORIZED_OUTPUT=1
-export RCUTILS_LOGGING_BUFFERED_STREAM=1
-export RCUTILS_CONSOLE_OUTPUT_FORMAT='[{severity}] [{time}] [{name}]: {message} ({function_name}() at {file_name}:{line_number})'
-export PYTHONWARNINGS='ignore:::setuptools.command.install,ignore:::setuptools.command.easy_install,ignore:::pkg_resources'
-export ROS_DOMAIN_ID=168
-export ROS_LOCALHOST_ONLY=0
+    rm -rf build
+    mkdir build
+    cd build
 
-# Configuração do Acados
-export ACADOS_SOURCE_DIR="$HOME/laser_uav_system_ws/src/laser_uav_controllers/acados"
-# Acados
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:"$HOME/laser_uav_system_ws/src/laser_uav_controllers/acados/lib"
+    cmake -DACADOS_WITH_QPOASES=ON \
+          -DACADOS_WITH_OSQP=OFF \
+          -DACADOS_INSTALL_DIR=".." \
+          -DBUILD_SHARED_LIBS=ON \
+          ..
 
-# Configuração do Gazebo + PX4
-# PX4 compilado
-PX4_BUILD_DIR="$HOME/git/laser_uav_system/.gitman/px4_firmware-ROS2-/build/px4_sitl_default/build_gazebo-classic"
-PX4_TOOLS_DIR="$HOME/git/laser_uav_system/.gitman/px4_firmware-ROS2-/Tools/simulation/gazebo-classic/sitl_gazebo-classic"
+    make install -j$(nproc)
 
-# plugins do Gazebo
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PX4_BUILD_DIR
+fi
+
+PX4_DIR="$HOME/git/laser_uav_system/.gitman/px4_firmware-ROS2-"
+if [ -d "$PX4_DIR" ]; then  # Use PX4_DIR aqui
+    cd $PX4_DIR
+    
+    rm -rf build
+    make clean
+    
+    DONT_RUN=1 make px4_sitl_default gazebo-classic -j$(nproc)
+
+else
+    echo "Diretório do PX4 não encontrado: $PX4_DIR"
+    exit 1
+fi
+
+export CMAKE_PREFIX_PATH=/usr/local:$CMAKE_PREFIX_PATH
+export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH
+export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+
+# Variáveis do PX4 compilado
+export PX4_BUILD_DIR="$PX4_DIR/build/px4_sitl_default/build_gazebo-classic"
+export PX4_TOOLS_DIR="$PX4_DIR/Tools/simulation/gazebo-classic/sitl_gazebo-classic"
 export GAZEBO_PLUGIN_PATH=$GAZEBO_PLUGIN_PATH:$PX4_BUILD_DIR
+export GAZEBO_MODEL_PATH=$GAZEBO_MODEL_PATH:$PX4_TOOLS_DIR/models
 
-# modelos 3D (Drone + Mundo)
-export GAZEBO_MODEL_PATH=$GAZEBO_MODEL_PATH:$PX4_TOOLS_DIR/models:$HOME/laser_uav_system_ws/src/laser_uav_simulation/models:$HOME/laser_uav_system_ws/src/laser_uav_simulation/core/models
-
-
-# Source do ROS
-source /opt/ros/jazzy/setup.bash
+cd $HOME/laser_uav_system_ws/src
+if [ ! -d "gazebo_ros_pkgs" ]; then
+    git clone https://github.com/ros-simulation/gazebo_ros_pkgs.git -b ros2
+fi
 
 if ! grep -q "Configurações Laser UAV System" ~/.bashrc; then
     cat <<'EOF' >> ~/.bashrc
@@ -113,42 +122,6 @@ fi
 
 source $HOME/.bashrc
 
-ACADOS_LIB="$HOME/laser_uav_system_ws/src/laser_uav_controllers/acados/lib/libacados.so"
-if [ ! -f "$ACADOS_LIB" ]; then
-    cd ~/laser_uav_system_ws/src/laser_uav_controllers/acados
-
-    git submodule update --recursive --init
-
-    rm -rf build
-    mkdir build
-    cd build
-
-    cmake -DACADOS_WITH_QPOASES=ON \
-          -DACADOS_WITH_OSQP=OFF \
-          -DACADOS_INSTALL_DIR=".." \
-          -DBUILD_SHARED_LIBS=ON \
-          ..
-
-    make install -j4
-
-fi
-
-PX4_BIN="$HOME/git/laser_uav_system/.gitman/px4_firmware-ROS2-/build/px4_sitl_default/bin/px4"
-if [ ! -f "$PX4_BIN" ]; then
-    pip install --user symforce pyros-genmsg lxml kconfiglib jsonschema future "empy==3.3.4" packaging toml numpy jinja2 --break-system-packages
-
-    cd ~/git/laser_uav_system/.gitman/px4_firmware-ROS2-
-
-    rm -rf build
-    make clean
-
-    DONT_RUN=1 make px4_sitl_default -j$(nproc)
-    DONT_RUN=1 make px4_sitl_default gazebo-classic -j$(nproc)
-fi
-
-cd $HOME/laser_uav_system_ws/src
-git clone https://github.com/ros-simulation/gazebo_ros_pkgs.git -b ros2
-
 TARGET_FILE="$HOME/laser_uav_system_ws/src/laser_uav_simulation/tmux/one_drone_test/session.yml"
 ADDITION="source ~/gazebo_env.sh;"
 
@@ -171,6 +144,7 @@ else
 fi
 
 cd $HOME/laser_uav_system_ws
+source /opt/ros/jazzy/setup.bash
 
 colcon build --symlink-install --packages-up-to gazebo_ros_pkgs
 

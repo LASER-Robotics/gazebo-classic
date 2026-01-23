@@ -301,11 +301,11 @@ cd build
 
 export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH
 
-cmake .. -DCMAKE_INSTALL_PREFIX=~/gazebo_install -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/usr/local -DPKG_CONFIG_PATH=/usr/local/lib/pkgconfig
+cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/usr/local -DPKG_CONFIG_PATH=/usr/local/lib/pkgconfig
 
 make -j$(nproc)
 
-make install
+sudo make install
 
 sudo ldconfig
 
@@ -319,39 +319,24 @@ sudo apt install -y ros-jazzy-tinyxml-vendor ros-jazzy-tinyxml2-vendor
 #===========================================
 
 cat << 'EOF' > ~/gazebo_env.sh
-
 #!/bin/bash
 
-# 1. Configurações do Gazebo Local
-export GAZEBO_PREFIX="$HOME/gazebo_install"
-export PATH="$GAZEBO_PREFIX/bin:$PATH"
-
-export LD_LIBRARY_PATH="$GAZEBO_PREFIX/lib:$LD_LIBRARY_PATH"
+# 1. Configurações Básicas de Bibliotecas (Garante que /usr/local seja lido)
 export LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH"
-
-export GAZEBO_PLUGIN_PATH="$GAZEBO_PREFIX/lib/gazebo-11/plugins"
-export GAZEBO_RESOURCE_PATH="$GAZEBO_PREFIX/share/gazebo-11"
-
-if [ -d "$GAZEBO_PREFIX/lib/cmake/gazebo-11" ]; then
-    export gazebo_DIR="$GAZEBO_PREFIX/lib/cmake/gazebo-11"
-else
-    export gazebo_DIR="$GAZEBO_PREFIX/lib/cmake/gazebo"
-fi
-
-export CMAKE_PREFIX_PATH="$GAZEBO_PREFIX:$CMAKE_PREFIX_PATH"
-export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$GAZEBO_PREFIX/lib/pkgconfig"
+export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH"
 
 # 2. Configurações do ROS e Workspace
 source /opt/ros/jazzy/setup.bash
-source ~/laser_uav_system_ws/install/setup.bash
+if [ -f "$HOME/laser_uav_system_ws/install/setup.bash" ]; then
+    source ~/laser_uav_system_ws/install/setup.bash
+fi
 
-# 3. Adiciona os Recursos do Projeto (Drones, Mundos)
+# 3. Adiciona os Recursos do SEU Projeto
 export GAZEBO_RESOURCE_PATH=$GAZEBO_RESOURCE_PATH:~/laser_uav_system_ws/install/laser_gazebo_resources/share/laser_gazebo_resources
-export GAZEBO_PLUGIN_PATH="$GAZEBO_PLUGIN_PATH:$HOME/laser_uav_system_ws/install/gazebo_plugins/lib"
+export GAZEBO_PLUGIN_PATH=$GAZEBO_PLUGIN_PATH:$HOME/laser_uav_system_ws/install/gazebo_plugins/lib
 
 # 4. Fix Gráfico
 export QT_QPA_PLATFORM=xcb
-
 EOF
 
 chmod +x ~/gazebo_env.sh

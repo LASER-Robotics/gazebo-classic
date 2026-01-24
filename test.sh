@@ -29,6 +29,10 @@ if [ ! -f "/usr/local/bin/MicroXRCEAgent" ]; then
 fi
 
 ACADOS_LIB="$HOME/laser_uav_system_ws/src/laser_uav_controllers/acados/lib/libacados.so"
+ACADOS_DIR="$HOME/laser_uav_system_ws/src/laser_uav_controllers/acados"
+export ACADOS_SOURCE_DIR="$ACADOS_DIR"
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:"$ACADOS_DIR/lib"
+
 if [ ! -f "$ACADOS_LIB" ]; then
     cd ~/laser_uav_system_ws/src/laser_uav_controllers/acados
 
@@ -48,8 +52,8 @@ if [ ! -f "$ACADOS_LIB" ]; then
 
 fi
 
-PX4_DIR="$HOME/git/laser_uav_system/.gitman/px4_firmware-ROS2-"
-if [ -d "$PX4_DIR" ]; then  # Use PX4_DIR aqui
+PX4_DIR="$HOME/git/laser_uav_system/ros_packages/px4_firmware"
+if [ -d "$PX4_DIR" ]; then 
     cd $PX4_DIR
     
     rm -rf build
@@ -71,6 +75,12 @@ export PX4_BUILD_DIR="$PX4_DIR/build/px4_sitl_default/build_gazebo-classic"
 export PX4_TOOLS_DIR="$PX4_DIR/Tools/simulation/gazebo-classic/sitl_gazebo-classic"
 export GAZEBO_PLUGIN_PATH=$GAZEBO_PLUGIN_PATH:$PX4_BUILD_DIR
 export GAZEBO_MODEL_PATH=$GAZEBO_MODEL_PATH:$PX4_TOOLS_DIR/models
+
+if [ -f /usr/local/share/gazebo/setup.sh ]; then
+    source /usr/local/share/gazebo/setup.sh
+else
+    source /usr/share/gazebo/setup.sh
+fi
 
 cd $HOME/laser_uav_system_ws/src
 if [ ! -d "gazebo_ros_pkgs" ]; then
@@ -104,10 +114,10 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:"$HOME/laser_uav_system_ws/src/laser_uav
 
 # Configuração do Gazebo + PX4
 # PX4 compilado
-PX4_BUILD_DIR="$HOME/git/laser_uav_system/.gitman/px4_firmware-ROS2-/build/px4_sitl_default/build_gazebo-classic"
-PX4_TOOLS_DIR="$HOME/git/laser_uav_system/.gitman/px4_firmware-ROS2-/Tools/simulation/gazebo-classic/sitl_gazebo-classic"
+PX4_DIR="$HOME/git/laser_uav_system/ros_packages/px4_firmware"
+PX4_BUILD_DIR="\$PX4_DIR/build/px4_sitl_default/build_gazebo-classic"
+PX4_TOOLS_DIR="\$PX4_DIR/Tools/simulation/gazebo-classic/sitl_gazebo-classic"
 
-# plugins do Gazebo
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PX4_BUILD_DIR
 export GAZEBO_PLUGIN_PATH=$GAZEBO_PLUGIN_PATH:$PX4_BUILD_DIR
 
@@ -116,35 +126,15 @@ export GAZEBO_MODEL_PATH=$GAZEBO_MODEL_PATH:$PX4_TOOLS_DIR/models:$HOME/laser_ua
 
 # Source do Workspace ROS
 source ~/laser_uav_system_ws/install/setup.bash
-source ~/gazebo_env.sh
 EOF
 fi
 
 source $HOME/.bashrc
 
-TARGET_FILE="$HOME/laser_uav_system_ws/src/laser_uav_simulation/tmux/one_drone_test/session.yml"
-ADDITION="source ~/gazebo_env.sh;"
-
-echo ">>> Verificando arquivo session.yml..."
-
-if [ ! -f "$TARGET_FILE" ]; then
-    echo "Verifique se o caminho está correto ou se o repositório foi clonado."
-    exit 1
-fi
-
-if grep -q "$ADDITION" "$TARGET_FILE"; then
-    echo "O arquivo session.yml já está configurado"
-else
-    # 3. Aplica a alteração usando SED
-    sed -i "s|pre_window: |pre_window: $ADDITION |" "$TARGET_FILE"
-    
-    echo ">>> Sucesso! Linha adicionada ao pre_window."
-    echo ">>> Nova linha:"
-    grep "pre_window" "$TARGET_FILE"
-fi
-
 cd $HOME/laser_uav_system_ws
 source /opt/ros/jazzy/setup.bash
+
+rm -rf build install log
 
 colcon build --symlink-install --packages-up-to gazebo_ros_pkgs
 

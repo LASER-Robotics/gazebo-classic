@@ -313,39 +313,6 @@ sudo apt update
 
 sudo apt install -y ros-jazzy-tinyxml-vendor ros-jazzy-tinyxml2-vendor
 
-
-#===========================================
-#               RUNTIME_ENV_CONFIG
-#===========================================
-
-cat << 'EOF' > ~/gazebo_env.sh
-#!/bin/bash
-
-# 1. Configurações Básicas de Bibliotecas (Garante que /usr/local seja lido)
-export LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH"
-export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH"
-
-# 2. Configurações do ROS e Workspace
-source /opt/ros/jazzy/setup.bash
-if [ -f "$HOME/laser_uav_system_ws/install/setup.bash" ]; then
-    source ~/laser_uav_system_ws/install/setup.bash
-fi
-
-# 3. Adiciona os Recursos do SEU Projeto
-export GAZEBO_RESOURCE_PATH=$GAZEBO_RESOURCE_PATH:~/laser_uav_system_ws/install/laser_gazebo_resources/share/laser_gazebo_resources
-export GAZEBO_PLUGIN_PATH=$GAZEBO_PLUGIN_PATH:$HOME/laser_uav_system_ws/install/gazebo_plugins/lib
-
-# 4. Fix Gráfico
-export QT_QPA_PLATFORM=xcb
-EOF
-
-chmod +x ~/gazebo_env.sh
-
-if ! grep -q "source ~/gazebo_env.sh" ~/.bashrc; then
-    echo 'source ~/gazebo_env.sh' >> ~/.bashrc
-    echo "Adicionado ao .bashrc"
-fi
-
 source ~/.bashrc
 
 echo "Finished"

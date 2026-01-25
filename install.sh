@@ -210,29 +210,6 @@ sudo make install
 cd $BASE_DIR
 
 #============================================
-#                AUTODIFF
-#============================================
-
-echo "AUTODIFF"
-
-rm -rf autodiff
-
-git clone https://github.com/autodiff/autodiff.git
-mkdir autodiff/build
-cd autodiff/build
-
-rm -rf *
-
-cmake .. -DCMAKE_BUILD_TYPE=Release \
-         -DCMAKE_INSTALL_PREFIX=/usr/local \
-         -DAUTODIFF_BUILD_PYTHON=OFF 
-
-make -j$(nproc)
-sudo make install
-
-cd $BASE_DIR
-
-#============================================
 #               REALSENSE
 #============================================
 

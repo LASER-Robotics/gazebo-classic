@@ -1,5 +1,5 @@
 sudo apt update
-sudo apt install python3-pip python3-vcstool python3-colcon-common-extensions git libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev gstreamer1.0-plugins-bad gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-ugly  ros-jazzy-eigen3-cmake-module ros-jazzy-mavlink ros-jazzy-pcl-conversions ros-jazzy-ros2bag ros-jazzy-rosbag2-storage-mcap libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libunwind-dev libgazebo-dev gstreamer1.0-plugins-bad gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-ugly
+sudo apt install python3-pip python3-vcstool python3-colcon-common-extensions git libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libdart-dev gstreamer1.0-plugins-bad gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-ugly  ros-jazzy-eigen3-cmake-module ros-jazzy-mavlink ros-jazzy-pcl-conversions ros-jazzy-ros2bag ros-jazzy-rosbag2-storage-mcap libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libunwind-dev libgazebo-dev gstreamer1.0-plugins-bad gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-ugly
 
 pip install --user gitman inputs pyyaml  symforce pyros-genmsg lxml kconfiglib jsonschema future "empy==3.3.4" packaging toml numpy jinja2 --break-system-packages
 
@@ -58,11 +58,32 @@ if [ -d "$PX4_DIR" ]; then
     
     rm -rf build
     make clean
-    
+
+    export CMAKE_PREFIX_PATH=/usr/local:$CMAKE_PREFIX_PATH
+    export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH
+    export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+
     DONT_RUN=1 make px4_sitl_default gazebo-classic -j$(nproc)
 
 else
     echo "Diretório do PX4 não encontrado: $PX4_DIR"
+    exit 1
+fi
+
+AUTODIFF_DIR="$HOME/laser_uav_system_ws/src/laser_uav_estimators/autodiff"
+if [ -d "$AUTODIFF_DIR" ]; then
+    cd $AUTODIFF_DIR
+    git submodule update --recursive --init
+
+    rm -rf build
+    mkdir -p build
+    cd build
+
+    cmake -DAUTODIFF_BUILD_TESTS=OFF -DAUTODIFF_BUILD_PYTHON=OFF ..
+    sudo make install -j$(nproc)
+
+else
+    echo "Diretorio do autodiff não encontrado: $AUTODIFF_DIR"
     exit 1
 fi
 

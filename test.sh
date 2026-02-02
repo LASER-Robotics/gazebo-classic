@@ -52,6 +52,17 @@ if [ ! -f "$ACADOS_LIB" ]; then
 
 fi
 
+
+sudo apt update
+sudo apt install libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
+sudo apt install gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav
+
+if [ -f /usr/local/share/gazebo/setup.sh ]; then
+    source /usr/local/share/gazebo/setup.sh
+else
+    source /usr/share/gazebo/setup.sh
+fi
+
 PX4_DIR="$HOME/git/laser_uav_system/ros_packages/px4_firmware"
 if [ -d "$PX4_DIR" ]; then 
     cd $PX4_DIR
@@ -62,7 +73,7 @@ if [ -d "$PX4_DIR" ]; then
     export CMAKE_PREFIX_PATH=/usr/local:$CMAKE_PREFIX_PATH
     export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH
     export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
-
+    
     DONT_RUN=1 make px4_sitl_default gazebo-classic -j$(nproc)
 
 else
@@ -97,11 +108,7 @@ export PX4_TOOLS_DIR="$PX4_DIR/Tools/simulation/gazebo-classic/sitl_gazebo-class
 export GAZEBO_PLUGIN_PATH=$GAZEBO_PLUGIN_PATH:$PX4_BUILD_DIR
 export GAZEBO_MODEL_PATH=$GAZEBO_MODEL_PATH:$PX4_TOOLS_DIR/models
 
-if [ -f /usr/local/share/gazebo/setup.sh ]; then
-    source /usr/local/share/gazebo/setup.sh
-else
-    source /usr/share/gazebo/setup.sh
-fi
+
 
 cd $HOME/laser_uav_system_ws/src
 if [ ! -d "gazebo_ros_pkgs" ]; then
@@ -112,41 +119,71 @@ if ! grep -q "Configurações Laser UAV System" ~/.bashrc; then
     cat <<'EOF' >> ~/.bashrc
 
 # --- Configurações Laser UAV System ---
+
 export MAKEFLAGS=-j4
 
+export QT_QPA_PLATFORM=xcb
+
+
 # Variáveis do Drone
+
 export UAV_NAME="uav1"
+
 export UAV_TYPE="lr7pro"
+
 export REAL_UAV="false"
 
+
 # Configurações de Log e Rede ROS 2 (Seus adicionais)
+
 export COLCON_LOG_LEVEL=30
+
 export RCUTILS_COLORIZED_OUTPUT=1
+
 export RCUTILS_LOGGING_BUFFERED_STREAM=1
+
 export RCUTILS_CONSOLE_OUTPUT_FORMAT='[{severity}] [{time}] [{name}]: {message} ({function_name}() at {file_name}:{line_number})'
+
 export PYTHONWARNINGS='ignore:::setuptools.command.install,ignore:::setuptools.command.easy_install,ignore:::pkg_resources'
+
 export ROS_DOMAIN_ID=168
+
 export ROS_LOCALHOST_ONLY=0
 
+
 # Configuração do Acados
+
 export ACADOS_SOURCE_DIR="$HOME/laser_uav_system_ws/src/laser_uav_controllers/acados"
+
 # Acados
+
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:"$HOME/laser_uav_system_ws/src/laser_uav_controllers/acados/lib"
 
+
 # Configuração do Gazebo + PX4
+
 # PX4 compilado
-PX4_DIR="$HOME/git/laser_uav_system/ros_packages/px4_firmware"
-PX4_BUILD_DIR="\$PX4_DIR/build/px4_sitl_default/build_gazebo-classic"
-PX4_TOOLS_DIR="\$PX4_DIR/Tools/simulation/gazebo-classic/sitl_gazebo-classic"
+
+export PX4_DIR="$HOME/git/laser_uav_system/ros_packages/px4_firmware"
+export PX4_BUILD_DIR="$PX4_DIR/build/px4_sitl_default/build_gazebo-classic"
+export PX4_TOOLS_DIR="$PX4_DIR/Tools/simulation/gazebo-classic/sitl_gazebo-classic"
+
 
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PX4_BUILD_DIR
+
 export GAZEBO_PLUGIN_PATH=$GAZEBO_PLUGIN_PATH:$PX4_BUILD_DIR
 
+
 # modelos 3D (Drone + Mundo)
+
 export GAZEBO_MODEL_PATH=$GAZEBO_MODEL_PATH:$PX4_TOOLS_DIR/models:$HOME/laser_uav_system_ws/src/laser_uav_simulation/models:$HOME/laser_uav_system_ws/src/laser_uav_simulation/core/models
 
+
 # Source do Workspace ROS
-source ~/laser_uav_system_ws/install/setup.bash
+
+source /usr/local/share/gazebo/setup.bash
+source /opt/ros/jazzy/setup.bash
+source ~/laser_uav_system_ws/install/setup.bash 
 EOF
 fi
 
@@ -162,3 +199,5 @@ colcon build --symlink-install --packages-up-to gazebo_ros_pkgs
 source install/setup.bash
 
 colcon build --symlink-install
+
+source install/setup.bash

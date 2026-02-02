@@ -207,62 +207,6 @@ cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local
 make -j$(nproc)
 sudo make install
 
-cd $BASE_DIR
-
-#============================================
-#               REALSENSE
-#============================================
-
-echo "REALSENSE"
-
-rm -rf librealsense
-
-git clone https://github.com/IntelRealSense/librealsense.git
-cd librealsense
-
-sudo cp config/99-realsense-libusb.rules /etc/udev/rules.d/
-
-sudo udevadm control --reload-rules && sudo udevadm trigger
-
-mkdir build
-cd build
-
-cmake .. -DCMAKE_BUILD_TYPE=Release -DFORCE_RSUSB_BACKEND=true -DBUILD_EXAMPLES=true -DBUILD_GRAPHICAL_EXAMPLES=true
-
-make -j$(nproc)
-
-sudo make install
-
-cd $BASE_DIR
-
-#=========================================
-#               LIVOX
-#=========================================
-
-echo "LIVOX"
-
-rm -rf Livox-SDK2
-
-git clone git@github.com:Livox-SDK/Livox-SDK2.git
-cd Livox-SDK2
-
-sed -i '1i #include <cstdint>' sdk_core/comm/define.h
-sed -i '1i #include <cstdint>' sdk_core/logger_handler/file_manager.h
-sed -i '1i #include <cstdint>' sdk_core/comm/comm_port.h
-sed -i '1i #include <cstdint>' sdk_core/params_check.h
-sed -i '1i #include <cstdint>' sdk_core/comm/sdk_protocol.h
-
-mkdir build
-cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release
-make -j$(nproc)
-
-sudo make install
-
-sudo ldconfig
-
-echo 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib' >> ~/.bashrc
-
 cd $THIS_DIR
 
 #==========================================
@@ -271,14 +215,28 @@ cd $THIS_DIR
 
 echo "GAZEBO-CLASSIC"
 
-rm -rf build
+# Dependências
+sudo apt update
+sudo apt install -y build-essential cmake pkg-config git \
+    libprotoc-dev protobuf-compiler \
+    libtinyxml2-dev libtinyxml-dev \
+    libtbb-dev libboost-all-dev \
+    libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev \
+    libogre-1.9-dev libtar-dev libcurl4-openssl-dev \
+    ros-jazzy-gazebo-dev ros-jazzy-gazebo-ros-pkgs
 
+source /opt/ros/jazzy/setup.bash
+
+cd $HOME/git/gazebo-classic
+rm -rf build
 mkdir -p build
 cd build
 
-export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH
-
-cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/usr/local -DPKG_CONFIG_PATH=/usr/local/lib/pkgconfig
+cmake .. \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_PREFIX_PATH="/usr;/opt/ros/jazzy" \
+    -DPKG_CONFIG_PATH=/usr/lib/pkgconfig:$PKG_CONFIG_PATH
 
 make -j$(nproc)
 
@@ -286,16 +244,15 @@ sudo make install
 
 sudo ldconfig
 
-sudo apt update
-
 sudo apt install -y ros-jazzy-tinyxml-vendor ros-jazzy-tinyxml2-vendor
+
+if [ $(grep -c "/usr/share/gazebo/setup.sh" ~/.bashrc) -ne 1 ]; then
+  echo "source /usr/share/gazebo/setup.sh" >> ~/.bashrc
+fi
 
 source ~/.bashrc
 
 echo "Finished"
-
-# No Arquivo session.yaml do laser_uav_simulation adicionar no pre_window o comando source ~/gazebo_env.sh
-# Necessário para o ROS enxergar as variáveis de ambiente
 
 # No src do workspace aplicar o comando git clone https://github.com/ros-simulation/gazebo_ros_pkgs.git -b ros2
 # antes de executar o colcon build padrão, executar colcon build --packages-up-to gazebo_ros_pkgs

@@ -1,3 +1,5 @@
+#!/bin/bash
+
 INSTALL_DIR=$HOME/git/submodules
 mkdir -p $INSTALL_DIR
 cd $INSTALL_DIR

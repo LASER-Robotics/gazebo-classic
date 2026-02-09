@@ -14,6 +14,13 @@ fi
 if [ -z "$REAL_UAV" ]; then
   resp=""
   [[ -t 0 ]] && { read -p $'\e[1;32mThis is a real uav? (true, false):\e[0m\n' resp ; }
+
+    if [[ "$resp" == "true" || "$resp" == "y" ]]; then
+        export REAL_UAV=$TRUE
+    else
+        export REAL_UAV=$FALSE
+    fi
+
   echo -e "export REAL_UAV=\""$resp"\"" >> ~/.bashrc
   source ~/.bashrc
 fi
@@ -37,11 +44,11 @@ fi
 sudo apt-get update
 sudo apt install pip -y
 pip install packaging==24.2 --break-system-packages
-pip3 install kconfiglib jsonschema pyros future empy==3.3.4 pyros-genmsg setuptools --break-system-packages
+pip3 install inputs pyyaml symforce pyros-genmsg lxml toml numpy jinja2 kconfiglib jsonschema pyros future empy==3.3.4 pyros-genmsg setuptools --break-system-packages
 sudo pip3 install --upgrade gitman --break-system-packages
 sudo apt install ros-jazzy-mavlink* -y
 sudo apt install ros-jazzy-pcl* -y
-sudo apt-get install libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good libunwind-dev
+sudo apt-get install -y libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good libunwind-dev python3-vcstool libdart-dev gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav ros-jazzy-eigen3-cmake-module ros-jazzy-pcl-conversions ros-jazzy-ros2bag ros-jazzy-rosbag2-storage-mcap ros-jazzy-diagnostic-updater toilet build-essential cmake pkg-config
 
 cd $BASE_DIR/git/laser_uav_system
 
@@ -91,8 +98,8 @@ if [ "$REAL_UAV" == $TRUE ]; then
   fi
 
   if [ "${GITHUB_ACTIONS}" == "true" ]; then
-    $BASE_DIR/git/laser_uav_system/environment_install/install_realsense_sdk.sh
-    $BASE_DIR/git/laser_uav_system/environment_install/install_livox_sdk.sh
+    ./$BASE_DIR/git/laser_uav_system/environment_install/install_realsense_sdk.sh
+    ./$BASE_DIR/git/laser_uav_system/environment_install/install_livox_sdk.sh
   else
    # realsense sdk installation
    default=n
@@ -107,7 +114,7 @@ if [ "$REAL_UAV" == $TRUE ]; then
   
      if [[ $response =~ ^(y|Y)=$ ]] 
      then
-       $BASE_DIR/git/laser_uav_system/environment_install/install_realsense_sdk.sh
+       ./$BASE_DIR/git/laser_uav_system/environment_install/install_realsense_sdk.sh
        break
      elif [[ $response =~ ^(n|N)=$ ]] 
      then
@@ -130,7 +137,7 @@ if [ "$REAL_UAV" == $TRUE ]; then
   
      if [[ $response =~ ^(y|Y)=$ ]] 
      then
-       $BASE_DIR/git/laser_uav_system/environment_install/install_livox_sdk.sh
+       ./$BASE_DIR/git/laser_uav_system/environment_install/install_livox_sdk.sh
        break
      elif [[ $response =~ ^(n|N)=$ ]] 
      then
@@ -159,7 +166,7 @@ if [ "$REAL_UAV" == $TRUE ]; then
 
  if [ $(grep -c "GAZEBO_PLUGIN_PATH" ~/.bashrc) -ne 1 ]; then
    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:"$BASE_DIR/git/laser_uav_system/ros_packages/px4_firmware/build/px4_sitl_default/build_gazebo-classic" && echo -e "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:"~/git/laser_uav_system/ros_packages/px4_firmware/build/px4_sitl_default/build_gazebo-classic"" >> ~/.bashrc
-   export GAZEBO_PLUGIN_PATH=$GAZEBO_PLUGIN_PATH$BASE_DIR/git/laser_uav_system/ros_packages/px4_firmware/build/px4_sitl_default/build_gazebo-classic && echo -e "export GAZEBO_PLUGIN_PATH=\$GAZEBO_PLUGIN_PATH~/git/laser_uav_system/ros_packages/px4_firmware/build/px4_sitl_default/build_gazebo-classic" >> ~/.bashrc
+   export GAZEBO_PLUGIN_PATH=$GAZEBO_PLUGIN_PATH:"$BASE_DIR/git/laser_uav_system/ros_packages/px4_firmware/build/px4_sitl_default/build_gazebo-classic" && echo -e "export GAZEBO_PLUGIN_PATH=\$GAZEBO_PLUGIN_PATH~/git/laser_uav_system/ros_packages/px4_firmware/build/px4_sitl_default/build_gazebo-classic" >> ~/.bashrc
    export GAZEBO_MODEL_PATH=$GAZEBO_MODEL_PATH:$BASE_DIR/git/laser_uav_system/ros_packages/px4_firmware/Tools/simulation/gazebo-classic/sitl_gazebo-classic/models:$BASE_DIR/git/laser_uav_system/ros_packages/laser_uav_simulation/models:$BASE_DIR/git/laser_uav_system/ros_packages/laser_uav_simulation/core/models && echo -e "export GAZEBO_MODEL_PATH=\$GAZEBO_MODEL_PATH:~/git/laser_uav_system/ros_packages/px4_firmware/Tools/simulation/gazebo-classic/sitl_gazebo-classic/models:~/git/laser_uav_system/ros_packages/laser_uav_simulation/models:~/git/laser_uav_system/ros_packages/laser_uav_simulation/core/models" >> ~/.bashrc
  fi
 
@@ -186,7 +193,10 @@ if [ "$REAL_UAV" == $TRUE ]; then
 
  rm -rf build install log
 
- colcon build --symlink-install --packages-up-to gazebo_ros_pkgs
+    if [ ! -d "src/gazebo_ros_pkgs" ] && [ "$REAL_UAV" == "false" ]; then
+        git clone https://github.com/ros-simulation/gazebo_ros_pkgs.git -b ros2 src/gazebo_ros_pkgs
+        colcon build --symlink-install --packages-up-to gazebo_ros_pkgs
+    fi
 
  source install/setup.bash
 

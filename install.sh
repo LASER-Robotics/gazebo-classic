@@ -235,7 +235,7 @@ cd build
 cmake .. \
     -DCMAKE_INSTALL_PREFIX=/usr \
     -DCMAKE_BUILD_TYPE=Release \
-    -DCMAKE_PREFIX_PATH="/usr;/opt/ros/jazzy" \
+    -DCMAKE_PREFIX_PATH="/usr/opt/ros/jazzy" \
     -DPKG_CONFIG_PATH=/usr/lib/pkgconfig:$PKG_CONFIG_PATH
 
 make -j$(nproc)

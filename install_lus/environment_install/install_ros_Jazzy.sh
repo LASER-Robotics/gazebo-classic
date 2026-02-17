@@ -52,8 +52,8 @@ sudo apt install ros-humble-eigen3-cmake-module -y
 pip install --user -U empy==3.3.4 pyros-genmsg setuptools --break-system-packages
 pip install -U colcon-common-extensions --break-system-packages
 
-if [ $(grep -c "/opt/ros/humble/setup.bash" ~/.bashrc) -ne 1 ]; then
-  source /opt/ros/humble/setup.bash && echo -e "\n# source ROS Humble\nsource /opt/ros/humble/setup.bash" >> ~/.bashrc
+if [ $(grep -c "/opt/ros/jazzy/setup.bash" ~/.bashrc) -ne 1 ]; then
+  source /opt/ros/jazzy/setup.bash && echo -e "\n# source ROS Jazzy\nsource /opt/ros/jazzy/setup.bash" >> ~/.bashrc
 fi
 
 if [ $(grep -c "COLCON_LOG_LEVEL" ~/.bashrc) -ne 1 ]; then

@@ -31,8 +31,9 @@ cd ./environment_install
 ./install_ros_Jazzy.sh
 
 if [ "$REAL_UAV" == $FALSE ]; then
-  if ! ls "/usr/bin" | grep -q "gazebo"; then
-    ./$HOME/git/gazebo-classic/install.sh
+    if ! command -v gazebo >/dev/null 2>&1; then
+        chmod +x $BASE_DIR/git/gazebo-classic/install.sh
+        $HOME/git/gazebo-classic/install.sh
   fi
 fi
 
@@ -42,12 +43,11 @@ fi
 
 # Install dep and packages
 sudo apt-get update
-sudo apt install pip -y
-pip install packaging==24.2 --break-system-packages
-pip3 install inputs pyyaml symforce pyros-genmsg lxml toml numpy jinja2 kconfiglib jsonschema pyros future empy==3.3.4 pyros-genmsg setuptools --break-system-packages
+sudo apt install python3-pip -y
+pip install packaging==24.2 setuptools==75.8.0 --break-system-packages
+pip3 install inputs pyyaml symforce pyros-genmsg lxml toml numpy jinja2 kconfiglib jsonschema pyros future empy==3.3.4 --break-system-packages
 sudo pip3 install --upgrade gitman --break-system-packages
-sudo apt install ros-jazzy-mavlink* -y
-sudo apt install ros-jazzy-pcl* -y
+sudo apt install ros-jazzy-mavlink* ros-jazzy-pcl* -y
 sudo apt-get install -y libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good libunwind-dev python3-vcstool libdart-dev gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav ros-jazzy-eigen3-cmake-module ros-jazzy-pcl-conversions ros-jazzy-ros2bag ros-jazzy-rosbag2-storage-mcap ros-jazzy-diagnostic-updater toilet build-essential cmake pkg-config
 
 cd $BASE_DIR/git/laser_uav_system
@@ -114,7 +114,7 @@ if [ "$REAL_UAV" == $TRUE ]; then
   
      if [[ $response =~ ^(y|Y)=$ ]] 
      then
-       ./$BASE_DIR/git/laser_uav_system/environment_install/install_realsense_sdk.sh
+       $BASE_DIR/git/laser_uav_system/environment_install/install_realsense_sdk.sh
        break
      elif [[ $response =~ ^(n|N)=$ ]] 
      then
@@ -160,15 +160,16 @@ if [ "$REAL_UAV" == $TRUE ]; then
  make install -j4
 
  if [ $(grep -c "ACADOS_SOURCE_DIR" ~/.bashrc) -ne 1 ]; then
-   export ACADOS_SOURCE_DIR="$BASE_DIR/laser_uav_system_ws/src/laser_uav_controllers/acados" && echo -e "#set acados solver of nmpc \nexport ACADOS_SOURCE_DIR="~/laser_uav_system_ws/src/laser_uav_controllers/acados"" >> ~/.bashrc
-   export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:"$BASE_DIR/laser_uav_system_ws/src/laser_uav_controllers/acados/lib" && echo -e "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:"~/laser_uav_system_ws/src/laser_uav_controllers/acados/lib"" >> ~/.bashrc
+   export ACADOS_SOURCE_DIR="$BASE_DIR/laser_uav_system_ws/src/laser_uav_controllers/acados" && echo -e "#set acados solver of nmpc \nexport ACADOS_SOURCE_DIR="$HOME/laser_uav_system_ws/src/laser_uav_controllers/acados"" >> ~/.bashrc
+   export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:"$BASE_DIR/laser_uav_system_ws/src/laser_uav_controllers/acados/lib" && echo -e "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:"$HOME/laser_uav_system_ws/src/laser_uav_controllers/acados/lib"" >> ~/.bashrc
  fi
 
  if [ $(grep -c "GAZEBO_PLUGIN_PATH" ~/.bashrc) -ne 1 ]; then
-   export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:"$BASE_DIR/git/laser_uav_system/ros_packages/px4_firmware/build/px4_sitl_default/build_gazebo-classic" && echo -e "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:"~/git/laser_uav_system/ros_packages/px4_firmware/build/px4_sitl_default/build_gazebo-classic"" >> ~/.bashrc
-   export GAZEBO_PLUGIN_PATH=$GAZEBO_PLUGIN_PATH:"$BASE_DIR/git/laser_uav_system/ros_packages/px4_firmware/build/px4_sitl_default/build_gazebo-classic" && echo -e "export GAZEBO_PLUGIN_PATH=\$GAZEBO_PLUGIN_PATH~/git/laser_uav_system/ros_packages/px4_firmware/build/px4_sitl_default/build_gazebo-classic" >> ~/.bashrc
-   export GAZEBO_MODEL_PATH=$GAZEBO_MODEL_PATH:$BASE_DIR/git/laser_uav_system/ros_packages/px4_firmware/Tools/simulation/gazebo-classic/sitl_gazebo-classic/models:$BASE_DIR/git/laser_uav_system/ros_packages/laser_uav_simulation/models:$BASE_DIR/git/laser_uav_system/ros_packages/laser_uav_simulation/core/models && echo -e "export GAZEBO_MODEL_PATH=\$GAZEBO_MODEL_PATH:~/git/laser_uav_system/ros_packages/px4_firmware/Tools/simulation/gazebo-classic/sitl_gazebo-classic/models:~/git/laser_uav_system/ros_packages/laser_uav_simulation/models:~/git/laser_uav_system/ros_packages/laser_uav_simulation/core/models" >> ~/.bashrc
+   export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:"$BASE_DIR/git/laser_uav_system/ros_packages/px4_firmware/build/px4_sitl_default/build_gazebo-classic" && echo -e "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:"$HOME/git/laser_uav_system/ros_packages/px4_firmware/build/px4_sitl_default/build_gazebo-classic"" >> ~/.bashrc
+   export GAZEBO_PLUGIN_PATH=$GAZEBO_PLUGIN_PATH:"$BASE_DIR/git/laser_uav_system/ros_packages/px4_firmware/build/px4_sitl_default/build_gazebo-classic" && echo -e "export GAZEBO_PLUGIN_PATH=\$GAZEBO_PLUGIN_PATH:"$HOME/git/laser_uav_system/ros_packages/px4_firmware/build/px4_sitl_default/build_gazebo-classic"" >> ~/.bashrc
+   export GAZEBO_MODEL_PATH=$GAZEBO_MODEL_PATH:$BASE_DIR/git/laser_uav_system/ros_packages/px4_firmware/Tools/simulation/gazebo-classic/sitl_gazebo-classic/models:$BASE_DIR/git/laser_uav_system/ros_packages/laser_uav_simulation/models:$BASE_DIR/git/laser_uav_system/ros_packages/laser_uav_simulation/core/models && echo -e "export GAZEBO_MODEL_PATH=\$GAZEBO_MODEL_PATH:$OHME/git/laser_uav_system/ros_packages/px4_firmware/Tools/simulation/gazebo-classic/sitl_gazebo-classic/models:$HOME/git/laser_uav_system/ros_packages/laser_uav_simulation/models:$HOME/git/laser_uav_system/ros_packages/laser_uav_simulation/core/models" >> ~/.bashrc
  fi
+
 
  # Autodiff for EKF
  cd $BASE_DIR/laser_uav_system_ws/src/laser_uav_estimators/
@@ -193,14 +194,27 @@ if [ "$REAL_UAV" == $TRUE ]; then
 
  rm -rf build install log
 
-    if [ ! -d "src/gazebo_ros_pkgs" ] && [ "$REAL_UAV" == "false" ]; then
+    if [ ! -d "src/gazebo_ros_pkgs" ] && [ "$REAL_UAV" == $FALSE ]; then
         git clone https://github.com/ros-simulation/gazebo_ros_pkgs.git -b ros2 src/gazebo_ros_pkgs
-        colcon build --symlink-install --packages-up-to gazebo_ros_pkgs
-    fi
+    fi 
+colcon build \
+    --packages-select gazebo_ros gazebo_plugins gazebo_msgs \
+    --cmake-args \
+        -DBUILD_TESTING=OFF \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH" \
+    --symlink-install
 
- source install/setup.bash
+source install/setup.bash
 
- colcon build --symlink-install --cmake-args -Wno-dev
+colcon build \
+    --symlink-install \
+    --cmake-args \
+        -DBUILD_TESTING=OFF \
+        -DCMAKE_BUILD_TYPE=Release \
+        -Wno-dev
+
+source install/setup.bash
 
  if [ $(grep -c "source ~/laser_uav_system_ws/install/setup.bash" ~/.bashrc) -ne 1 ]; then
   source $BASE_DIR/laser_uav_system_ws/install/setup.bash && echo -e "\n\n#source laser_uav_system workspace \nsource ~/laser_uav_system_ws/install/setup.bash" >> ~/.bashrc
@@ -212,4 +226,3 @@ if [ "$REAL_UAV" == $TRUE ]; then
  toilet uav
  toilet system 
  toilet installed
-

@@ -248,29 +248,25 @@ sudo ldconfig
 
 sudo apt install -y ros-jazzy-tinyxml-vendor ros-jazzy-tinyxml2-vendor
 
-#if [ $(grep -c "/usr/share/gazebo/setup.sh" ~/.bashrc) -ne 1 ]; then
-#  echo "source /usr/share/gazebo/setup.sh" >> ~/.bashrc
-#fi
-
 if ! grep -q "GAZEBO CLASSIC LOCAL" ~/.bashrc; then
-cat <<EOF >> ~/.bashrc
-
-# ===============================
-# GAZEBO CLASSIC LOCAL
-# ===============================
-export GAZEBO_DIR=/usr/local
-export CMAKE_PREFIX_PATH=/usr/local:\$CMAKE_PREFIX_PATH
-export LD_LIBRARY_PATH=/usr/local/lib:\$LD_LIBRARY_PATH
-export GAZEBO_PLUGIN_PATH=/usr/local/lib:\$GAZEBO_PLUGIN_PATH
-export GAZEBO_MODEL_PATH=/usr/local/share/gazebo/models:\$GAZEBO_MODEL_PATH
-export PATH=/usr/local/bin:\$PATH
-EOF
+    echo "" >> ~/.bashrc
+    echo "# ===============================" >> ~/.bashrc
+    echo "# GAZEBO CLASSIC LOCAL" >> ~/.bashrc
+    echo "# ===============================" >> ~/.bashrc
+    echo "source /usr/local/share/gazebo/setup.sh" >> ~/.bashrc
+    echo "export GAZEBO_RESOURCE_PATH=/usr/local/share/gazebo-11:$GAZEBO_RESOURCE_PATH" >> ~/.bashrc
+    echo "export GAZEBO_DIR=/usr/local" >> ~/.bashrc
+    echo "export CMAKE_PREFIX_PATH=/usr/local:$CMAKE_PREFIX_PATH" >> ~/.bashrc
+    echo "export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH" >> ~/.bashrc
+    echo "export GAZEBO_PLUGIN_PATH=/usr/local/lib:$GAZEBO_PLUGIN_PATH" >> ~/.bashrc
+    echo "export GAZEBO_MODEL_PATH=/usr/local/share/gazebo/models:$GAZEBO_MODEL_PATH" >> ~/.bashrc
+    echo "export PATH=/usr/local/bin:$PATH" >> ~/.bashrc
+    
+    echo "Variáveis do Gazebo adicionadas ao ~/.bashrc com sucesso!"
+else
+    echo "Variáveis do Gazebo já existem no ~/.bashrc."
 fi
 
-source ~/.bashrc
+    source $HOME/.bashrc
 
 echo "Finished"
-
-# No src do workspace aplicar o comando git clone https://github.com/ros-simulation/gazebo_ros_pkgs.git -b ros2
-# antes de executar o colcon build padrão, executar colcon build --packages-up-to gazebo_ros_pkgs
-# Garante que o sistema saiba que os plugins existam

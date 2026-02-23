@@ -3,17 +3,14 @@
 #==================================================
 # Instalação do ROS 2 (Jazzy) 
 #==================================================
-echo "==> Iniciando a instalação do ROS 2 Jazzy..."
+echo "ROS2 Jazzy"
 
-echo "==> 1. Configurando o 'locale' (UTF-8)..."
 sudo apt-get update
 sudo apt-get install -y locales
 sudo locale-gen en_US en_US.UTF-8
 sudo update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
 export LANG=en_US.UTF-8
-echo "Locale configurado."
 
-echo "==> 2. Adicionando repositórios..."
 sudo apt-get install -y software-properties-common curl gnupg lsb-release
 sudo add-apt-repository -y universe
 
@@ -23,7 +20,7 @@ sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o
 # Adiciona a fonte do ROS 2
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
 
-echo "==> 3. Instalando ROS 2 Jazzy e Ferramentas de Simulação..."
+echo "ROS 2 Jazzy e Simulation Tools"
 sudo apt-get update
 sudo apt-get install -y \
     ros-jazzy-desktop-full \
@@ -47,9 +44,9 @@ fi
 sudo apt install python3-colcon-clean -y
 
 sudo apt install python3-colcon-common-extensions -y
-sudo apt install ros-humble-eigen3-cmake-module -y
+sudo apt install ros-jazzy-eigen3-cmake-module -y
 
-pip install --user -U empy==3.3.4 pyros-genmsg setuptools --break-system-packages
+pip install --user -U empy==3.3.4 pyros-genmsg setuptools==75.8.0 --break-system-packages
 pip install -U colcon-common-extensions --break-system-packages
 
 if [ $(grep -c "/opt/ros/jazzy/setup.bash" ~/.bashrc) -ne 1 ]; then

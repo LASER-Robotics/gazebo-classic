@@ -22,7 +22,7 @@ if [ -z "$REAL_UAV" ]; then
     fi
 
   echo -e "export REAL_UAV=\""$resp"\"" >> ~/.bashrc
-  source ~/.bashrc
+  source $HOME/.bashrc
 fi
 
 # Install ROS Jazzy and Gazebo garden
@@ -47,8 +47,31 @@ sudo apt install python3-pip -y
 pip install packaging==24.2 setuptools==75.8.0 --break-system-packages
 pip3 install inputs pyyaml symforce pyros-genmsg lxml toml numpy jinja2 kconfiglib jsonschema pyros future empy==3.3.4 --break-system-packages
 sudo pip3 install --upgrade gitman --break-system-packages
-sudo apt install ros-jazzy-mavlink* ros-jazzy-pcl* -y
-sudo apt-get install -y libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good libunwind-dev python3-vcstool libdart-dev gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav ros-jazzy-eigen3-cmake-module ros-jazzy-pcl-conversions ros-jazzy-ros2bag ros-jazzy-rosbag2-storage-mcap ros-jazzy-diagnostic-updater toilet build-essential cmake pkg-config
+sudo apt install ros-jazzy-mavlink* \
+                 ros-jazzy-pcl* -y
+
+sudo apt-get install -y libgstreamer1.0-dev \
+                        libgstreamer-plugins-base1.0-dev \
+                        gstreamer1.0-plugins-base \
+                        gstreamer1.0-plugins-good \
+                        libunwind-dev \
+                        python3-vcstool \
+                        libdart-dev \
+                        gstreamer1.0-plugins-bad \
+                        gstreamer1.0-plugins-ugly \
+                        gstreamer1.0-libav \
+                        ros-jazzy-eigen3-cmake-module \
+                        ros-jazzy-pcl-conversions \
+                        ros-jazzy-ros2bag \
+                        ros-jazzy-rosbag2-storage-mcap \
+                        ros-jazzy-diagnostic-updater \
+                        ros-jazzy-cv-bridge \
+                        ros-jazzy-image-transport \
+                        ros-jazzy-camera-info-manager \
+                        ros-jazzy-camera-calibration-parsers \
+                        toilet \
+                        build-essential \
+                        cmake pkg-config
 
 cd $BASE_DIR/git/laser_uav_system
 
@@ -72,23 +95,6 @@ if [ "$REAL_UAV" == $FALSE ]; then
   ./build_px4_firmware.sh
   cd $BASE_DIR/laser_uav_system_ws/src
   rm px4_firmware
-fi
-
-rm micro_xrce_dds_agent
-# Make package with comunication protocol
-cd $BASE_DIR/git/laser_uav_system/ros_packages/micro_xrce_dds_agent
-mkdir build
-cd build
-cmake ..
-make
-sudo make install
-sudo ldconfig /usr/local/lib/
-
-if [ "$REAL_UAV" == $TRUE ]; then
-  if [ -z "$UAV_NAME" ]; then
-    resp=""
-    [[ -t 0 ]] && { read -p $'\e[1;32mWhat the uav name (ex: uav1, uav2, uav3, ...):\e[0m\n' resp ; }
-    echo -e "export UAV_NAME=\""$resp"\"" >> ~/.bashrc
   fi
 
   if [ -z "$UAV_TYPE" ]; then
@@ -167,7 +173,24 @@ if [ "$REAL_UAV" == $TRUE ]; then
  if [ $(grep -c "GAZEBO_PLUGIN_PATH" ~/.bashrc) -ne 1 ]; then
    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:"$BASE_DIR/git/laser_uav_system/ros_packages/px4_firmware/build/px4_sitl_default/build_gazebo-classic" && echo -e "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:"$HOME/git/laser_uav_system/ros_packages/px4_firmware/build/px4_sitl_default/build_gazebo-classic"" >> ~/.bashrc
    export GAZEBO_PLUGIN_PATH=$GAZEBO_PLUGIN_PATH:"$BASE_DIR/git/laser_uav_system/ros_packages/px4_firmware/build/px4_sitl_default/build_gazebo-classic" && echo -e "export GAZEBO_PLUGIN_PATH=\$GAZEBO_PLUGIN_PATH:"$HOME/git/laser_uav_system/ros_packages/px4_firmware/build/px4_sitl_default/build_gazebo-classic"" >> ~/.bashrc
-   export GAZEBO_MODEL_PATH=$GAZEBO_MODEL_PATH:$BASE_DIR/git/laser_uav_system/ros_packages/px4_firmware/Tools/simulation/gazebo-classic/sitl_gazebo-classic/models:$BASE_DIR/git/laser_uav_system/ros_packages/laser_uav_simulation/models:$BASE_DIR/git/laser_uav_system/ros_packages/laser_uav_simulation/core/models && echo -e "export GAZEBO_MODEL_PATH=\$GAZEBO_MODEL_PATH:$OHME/git/laser_uav_system/ros_packages/px4_firmware/Tools/simulation/gazebo-classic/sitl_gazebo-classic/models:$HOME/git/laser_uav_system/ros_packages/laser_uav_simulation/models:$HOME/git/laser_uav_system/ros_packages/laser_uav_simulation/core/models" >> ~/.bashrc
+   export GAZEBO_MODEL_PATH=$GAZEBO_MODEL_PATH:$BASE_DIR/git/laser_uav_system/ros_packages/px4_firmware/Tools/simulation/gazebo-classic/sitl_gazebo-classic/models:$BASE_DIR/git/laser_uav_system/ros_packages/laser_uav_simulation/models:$BASE_DIR/git/laser_uav_system/ros_packages/laser_uav_simulation/core/models && echo -e "export GAZEBO_MODEL_PATH=\$GAZEBO_MODEL_PATH:$HOME/git/laser_uav_system/ros_packages/px4_firmware/Tools/simulation/gazebo-classic/sitl_gazebo-classic/models:$HOME/git/laser_uav_system/ros_packages/laser_uav_simulation/models:$HOME/git/laser_uav_system/ros_packages/laser_uav_simulation/core/models" >> ~/.bashrc
+ fi
+
+
+ # Autodiff for EKF
+ cd $BASE_DIR/laser_uav_system_ws/src/laser_uav_estimators/
+ git submodule update --recursive --init
+ cd autodiff
+ mkdir -p build
+ cd build
+ cmake -DAUTODIFF_BUILD_TESTS=OFF -DAUTODIFF_BUILD_PYTHON=OFF ..
+ sudo make install -j4
+
+ source ~/.bashrc
+
+ # Ceres solver for Open Vins
+ sudo apt-get install ros-jazzy-ros2bag ros-jazzy-rosbag2* -y
+   export GAZEBO_MODEL_PATH=$GAZEBO_MODEL_PATH:$BASE_DIR/git/laser_uav_system/ros_packages/px4_firmware/Tools/simulation/gazebo-classic/sitl_gazebo-classic/models:$BASE_DIR/git/laser_uav_system/ros_packages/laser_uav_simulation/models:$BASE_DIR/git/laser_uav_system/ros_packages/laser_uav_simulation/core/models && echo -e "export GAZEBO_MODEL_PATH=\$GAZEBO_MODEL_PATH:$HOME/git/laser_uav_system/ros_packages/px4_firmware/Tools/simulation/gazebo-classic/sitl_gazebo-classic/models:$HOME/git/laser_uav_system/ros_packages/laser_uav_simulation/models:$HOME/git/laser_uav_system/ros_packages/laser_uav_simulation/core/models" >> ~/.bashrc
  fi
 
 
@@ -186,11 +209,17 @@ if [ "$REAL_UAV" == $TRUE ]; then
  sudo apt-get install ros-jazzy-ros2bag ros-jazzy-rosbag2* -y
  sudo apt-get install libeigen3-dev libboost-all-dev libceres-dev -y
 
+export ACADOS_SOURCE_DIR="$BASE_DIR/laser_uav_system_ws/src/laser_uav_controllers/acados"
+ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:"$ACADOS_SOURCE_DIR/lib"
+ export CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH:"$ACADOS_SOURCE_DIR/include"
+
  source ~/.bashrc
 
  # Build workspace
  cd $BASE_DIR/laser_uav_system_ws
  source /opt/ros/jazzy/setup.bash
+
+ rosdep install --from-paths src --ignore-src -r -y
 
  rm -rf build install log
 
@@ -198,21 +227,25 @@ if [ "$REAL_UAV" == $TRUE ]; then
         git clone https://github.com/ros-simulation/gazebo_ros_pkgs.git -b ros2 src/gazebo_ros_pkgs
     fi 
 colcon build \
-    --packages-select gazebo_ros gazebo_plugins gazebo_msgs \
+    --packages-up-to gazebo_ros_pkgs \
+    --symlink-install \
     --cmake-args \
-        -DBUILD_TESTING=OFF \
-        -DCMAKE_BUILD_TYPE=Release \
-        -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH" \
-    --symlink-install
+     -DBUILD_TESTING=OFF \
+     -DCMAKE_BUILD_TYPE=Release 
 
 source install/setup.bash
 
+ if [ $(grep -c "export CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH:$HOME/laser_uav_system_ws/install/gazebo_ros/include" ~/.bashrc) -ne 1 ]; then
+  export CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH:$HOME/laser_uav_system_ws/install/gazebo_ros/include && 
+  echo -e "export CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH:$HOME/laser_uav_system_ws/install/gazebo_ros/include" >> ~/.bashrc
+ fi
+
 colcon build \
-    --symlink-install \
-    --cmake-args \
-        -DBUILD_TESTING=OFF \
-        -DCMAKE_BUILD_TYPE=Release \
-        -Wno-dev
+     --symlink-install \
+     --cmake-args \
+     -DCMAKE_PREFIX_PATH="/usr/local;/opt/ros/jazzy" \
+     -DPKG_CONFIG_PATH="/usr/local/lib/pkgconfig" \
+     -Wno-dev 
 
 source install/setup.bash
 

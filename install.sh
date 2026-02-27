@@ -248,25 +248,6 @@ sudo ldconfig
 
 sudo apt install -y ros-jazzy-tinyxml-vendor ros-jazzy-tinyxml2-vendor
 
-if ! grep -q "GAZEBO CLASSIC LOCAL" ~/.bashrc; then
-    echo "" >> ~/.bashrc
-    echo "# ===============================" >> ~/.bashrc
-    echo "# GAZEBO CLASSIC LOCAL" >> ~/.bashrc
-    echo "# ===============================" >> ~/.bashrc
-    echo "source /usr/local/share/gazebo/setup.sh" >> ~/.bashrc
-    echo "export GAZEBO_RESOURCE_PATH=/usr/local/share/gazebo-11:$GAZEBO_RESOURCE_PATH" >> ~/.bashrc
-    echo "export GAZEBO_DIR=/usr/local" >> ~/.bashrc
-    echo "export CMAKE_PREFIX_PATH=/usr/local:$CMAKE_PREFIX_PATH" >> ~/.bashrc
-    echo "export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH" >> ~/.bashrc
-    echo "export GAZEBO_PLUGIN_PATH=/usr/local/lib:$GAZEBO_PLUGIN_PATH" >> ~/.bashrc
-    echo "export GAZEBO_MODEL_PATH=/usr/local/share/gazebo/models:$GAZEBO_MODEL_PATH" >> ~/.bashrc
-    echo "export PATH=/usr/local/bin:$PATH" >> ~/.bashrc
-    
-    echo "Variáveis do Gazebo adicionadas ao ~/.bashrc com sucesso!"
-else
-    echo "Variáveis do Gazebo já existem no ~/.bashrc."
-fi
-
-    source $HOME/.bashrc
+source $HOME/.bashrc
 
 echo "Finished"

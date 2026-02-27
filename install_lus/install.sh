@@ -37,6 +37,23 @@ if [ "$REAL_UAV" == $FALSE ]; then
   fi
 fi
 
+if ! grep -q "GAZEBO CLASSIC LOCAL" ~/.bashrc; then
+    echo "" >> ~/.bashrc
+    echo -e "\n# GAZEBO CLASSIC LOCAL" >> ~/.bashrc
+    echo -e "source /usr/local/share/gazebo/setup.sh" >> ~/.bashrc
+    echo -e "export GAZEBO_RESOURCE_PATH=/usr/local/share/gazebo-11:\$GAZEBO_RESOURCE_PATH" >> ~/.bashrc
+    echo -e "export GAZEBO_DIR=/usr/local" >> ~/.bashrc
+    echo -e "export CMAKE_PREFIX_PATH=/usr/local:\$CMAKE_PREFIX_PATH" >> ~/.bashrc
+    echo -e "export LD_LIBRARY_PATH=/usr/local/lib:\$LD_LIBRARY_PATH" >> ~/.bashrc
+    echo -e "export GAZEBO_PLUGIN_PATH=/usr/local/lib:\$GAZEBO_PLUGIN_PATH" >> ~/.bashrc
+    echo -e "export GAZEBO_MODEL_PATH=/usr/local/share/gazebo/models:\$GAZEBO_MODEL_PATH" >> ~/.bashrc
+    echo -e "export PATH=/usr/local/bin:\$PATH" >> ~/.bashrc
+    
+    echo -e "\nGAZEBO VARIABLES ADDED!!!\n"
+else
+    echo -e "\nGAZEBO VARIABLES ALREADY EXIST!!!\n"
+fi
+
  if [ $(grep -c "MAKEFLAGS" ~/.bashrc) -ne 1 ]; then
    export MAKEFLAGS=-j4 && echo -e "export MAKEFLAGS=-j4" >> ~/.bashrc
  fi
@@ -95,6 +112,23 @@ if [ "$REAL_UAV" == $FALSE ]; then
   ./build_px4_firmware.sh
   cd $BASE_DIR/laser_uav_system_ws/src
   rm px4_firmware
+fi
+
+rm micro_xrce_dds_agent
+# Make package with comunication protocol
+cd $BASE_DIR/git/laser_uav_system/ros_packages/micro_xrce_dds_agent
+mkdir build
+cd build
+cmake ..
+make
+sudo make install
+sudo ldconfig /usr/local/lib/
+
+if [ "$REAL_UAV" == $TRUE ]; then
+  if [ -z "$UAV_NAME" ]; then
+    resp=""
+    [[ -t 0 ]] && { read -p $'\e[1;32mWhat the uav name (ex: uav1, uav2, uav3, ...):\e[0m\n' resp ; }
+    echo -e "export UAV_NAME=\""$resp"\"" >> ~/.bashrc
   fi
 
   if [ -z "$UAV_TYPE" ]; then
@@ -104,8 +138,8 @@ if [ "$REAL_UAV" == $FALSE ]; then
   fi
 
   if [ "${GITHUB_ACTIONS}" == "true" ]; then
-    ./$BASE_DIR/git/laser_uav_system/environment_install/install_realsense_sdk.sh
-    ./$BASE_DIR/git/laser_uav_system/environment_install/install_livox_sdk.sh
+    $BASE_DIR/git/laser_uav_system/environment_install/install_realsense_sdk.sh
+    $BASE_DIR/git/laser_uav_system/environment_install/install_livox_sdk.sh
   else
    # realsense sdk installation
    default=n
@@ -170,7 +204,7 @@ if [ "$REAL_UAV" == $FALSE ]; then
    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:"$BASE_DIR/laser_uav_system_ws/src/laser_uav_controllers/acados/lib" && echo -e "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:"$HOME/laser_uav_system_ws/src/laser_uav_controllers/acados/lib"" >> ~/.bashrc
  fi
 
- if [ $(grep -c "GAZEBO_PLUGIN_PATH" ~/.bashrc) -ne 1 ]; then
+ if [ $(grep -c "laser_uav_system/ros_packages/laser_uav_simulation/core/models " ~/.bashrc) -ne 1 ]; then
    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:"$BASE_DIR/git/laser_uav_system/ros_packages/px4_firmware/build/px4_sitl_default/build_gazebo-classic" && echo -e "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:"$HOME/git/laser_uav_system/ros_packages/px4_firmware/build/px4_sitl_default/build_gazebo-classic"" >> ~/.bashrc
    export GAZEBO_PLUGIN_PATH=$GAZEBO_PLUGIN_PATH:"$BASE_DIR/git/laser_uav_system/ros_packages/px4_firmware/build/px4_sitl_default/build_gazebo-classic" && echo -e "export GAZEBO_PLUGIN_PATH=\$GAZEBO_PLUGIN_PATH:"$HOME/git/laser_uav_system/ros_packages/px4_firmware/build/px4_sitl_default/build_gazebo-classic"" >> ~/.bashrc
    export GAZEBO_MODEL_PATH=$GAZEBO_MODEL_PATH:$BASE_DIR/git/laser_uav_system/ros_packages/px4_firmware/Tools/simulation/gazebo-classic/sitl_gazebo-classic/models:$BASE_DIR/git/laser_uav_system/ros_packages/laser_uav_simulation/models:$BASE_DIR/git/laser_uav_system/ros_packages/laser_uav_simulation/core/models && echo -e "export GAZEBO_MODEL_PATH=\$GAZEBO_MODEL_PATH:$HOME/git/laser_uav_system/ros_packages/px4_firmware/Tools/simulation/gazebo-classic/sitl_gazebo-classic/models:$HOME/git/laser_uav_system/ros_packages/laser_uav_simulation/models:$HOME/git/laser_uav_system/ros_packages/laser_uav_simulation/core/models" >> ~/.bashrc
@@ -190,26 +224,9 @@ if [ "$REAL_UAV" == $FALSE ]; then
 
  # Ceres solver for Open Vins
  sudo apt-get install ros-jazzy-ros2bag ros-jazzy-rosbag2* -y
-   export GAZEBO_MODEL_PATH=$GAZEBO_MODEL_PATH:$BASE_DIR/git/laser_uav_system/ros_packages/px4_firmware/Tools/simulation/gazebo-classic/sitl_gazebo-classic/models:$BASE_DIR/git/laser_uav_system/ros_packages/laser_uav_simulation/models:$BASE_DIR/git/laser_uav_system/ros_packages/laser_uav_simulation/core/models && echo -e "export GAZEBO_MODEL_PATH=\$GAZEBO_MODEL_PATH:$HOME/git/laser_uav_system/ros_packages/px4_firmware/Tools/simulation/gazebo-classic/sitl_gazebo-classic/models:$HOME/git/laser_uav_system/ros_packages/laser_uav_simulation/models:$HOME/git/laser_uav_system/ros_packages/laser_uav_simulation/core/models" >> ~/.bashrc
- fi
-
-
- # Autodiff for EKF
- cd $BASE_DIR/laser_uav_system_ws/src/laser_uav_estimators/
- git submodule update --recursive --init
- cd autodiff
- mkdir -p build
- cd build
- cmake -DAUTODIFF_BUILD_TESTS=OFF -DAUTODIFF_BUILD_PYTHON=OFF ..
- sudo make install -j4
-
- source ~/.bashrc
-
- # Ceres solver for Open Vins
- sudo apt-get install ros-jazzy-ros2bag ros-jazzy-rosbag2* -y
  sudo apt-get install libeigen3-dev libboost-all-dev libceres-dev -y
 
-export ACADOS_SOURCE_DIR="$BASE_DIR/laser_uav_system_ws/src/laser_uav_controllers/acados"
+ export ACADOS_SOURCE_DIR="$BASE_DIR/laser_uav_system_ws/src/laser_uav_controllers/acados"
  export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:"$ACADOS_SOURCE_DIR/lib"
  export CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH:"$ACADOS_SOURCE_DIR/include"
 
@@ -235,9 +252,10 @@ colcon build \
 
 source install/setup.bash
 
- if [ $(grep -c "export CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH:$HOME/laser_uav_system_ws/install/gazebo_ros/include" ~/.bashrc) -ne 1 ]; then
+if ! grep -q "laser_uav_system_ws/install/gazebo_ros/include" ~/.bashrc; then
   export CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH:$HOME/laser_uav_system_ws/install/gazebo_ros/include && 
-  echo -e "export CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH:$HOME/laser_uav_system_ws/install/gazebo_ros/include" >> ~/.bashrc
+  echo -e "export CPLUS_INCLUDE_PATH=\$CPLUS_INCLUDE_PATH:$HOME/laser_uav_system_ws/install/gazebo_ros/include" >> ~/.bashrc
+  echo -e "export CPLUS_INCLUDE_PATH=\$CPLUS_INCLUDE_PATH:\$ACADOS_SOURCE_DIR/includex" >> ~/.bashrc
  fi
 
 colcon build \

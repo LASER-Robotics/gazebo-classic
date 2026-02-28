@@ -261,7 +261,7 @@ colcon build \
 source install/setup.bash
 
 if ! grep -q "laser_uav_system_ws/install/gazebo_ros/include" ~/.bashrc; then
-  export CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH:$HOME/laser_uav_system_ws/install/gazebo_ros/include && 
+  export CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH:$HOME/laser_uav_system_ws/install/include && 
   echo -e "export CPLUS_INCLUDE_PATH=\$CPLUS_INCLUDE_PATH:$HOME/laser_uav_system_ws/install/include" >> ~/.bashrc
   echo -e "export CPLUS_INCLUDE_PATH=\$CPLUS_INCLUDE_PATH:\$ACADOS_SOURCE_DIR/include" >> ~/.bashrc
  fi

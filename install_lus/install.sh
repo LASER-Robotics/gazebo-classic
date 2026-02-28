@@ -48,6 +48,16 @@ if ! grep -q "GAZEBO CLASSIC LOCAL" ~/.bashrc; then
     echo -e "export GAZEBO_PLUGIN_PATH=/usr/local/lib:\$GAZEBO_PLUGIN_PATH" >> ~/.bashrc
     echo -e "export GAZEBO_MODEL_PATH=/usr/local/share/gazebo/models:\$GAZEBO_MODEL_PATH" >> ~/.bashrc
     echo -e "export PATH=/usr/local/bin:\$PATH" >> ~/.bashrc
+
+
+    source /usr/local/share/gazebo/setup.sh
+    export GAZEBO_RESOURCE_PATH=/usr/local/share/gazebo-11:\$GAZEBO_RESOURCE_PATH
+    export GAZEBO_DIR=/usr/local
+    export CMAKE_PREFIX_PATH=/usr/local:\$CMAKE_PREFIX_PATH
+    export LD_LIBRARY_PATH=/usr/local/lib:\$LD_LIBRARY_PATH
+    export GAZEBO_PLUGIN_PATH=/usr/local/lib:\$GAZEBO_PLUGIN_PATH
+    export GAZEBO_MODEL_PATH=/usr/local/share/gazebo/models:\$GAZEBO_MODEL_PATH
+    export PATH=/usr/local/bin:\$PATH
     
     echo -e "\nGAZEBO VARIABLES ADDED!!!\n"
 else
@@ -236,33 +246,30 @@ if [ "$REAL_UAV" == $TRUE ]; then
  cd $BASE_DIR/laser_uav_system_ws
  source /opt/ros/jazzy/setup.bash
 
- rosdep install --from-paths src --ignore-src -r -y
-
  rm -rf build install log
 
     if [ ! -d "src/gazebo_ros_pkgs" ] && [ "$REAL_UAV" == $FALSE ]; then
         git clone https://github.com/ros-simulation/gazebo_ros_pkgs.git -b ros2 src/gazebo_ros_pkgs
     fi 
+
 colcon build \
     --packages-up-to gazebo_ros_pkgs \
     --symlink-install \
-    --cmake-args \
-     -DBUILD_TESTING=OFF \
-     -DCMAKE_BUILD_TYPE=Release 
+    --merge-install \
+    --cmake-args 
 
 source install/setup.bash
 
 if ! grep -q "laser_uav_system_ws/install/gazebo_ros/include" ~/.bashrc; then
   export CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH:$HOME/laser_uav_system_ws/install/gazebo_ros/include && 
-  echo -e "export CPLUS_INCLUDE_PATH=\$CPLUS_INCLUDE_PATH:$HOME/laser_uav_system_ws/install/gazebo_ros/include" >> ~/.bashrc
-  echo -e "export CPLUS_INCLUDE_PATH=\$CPLUS_INCLUDE_PATH:\$ACADOS_SOURCE_DIR/includex" >> ~/.bashrc
+  echo -e "export CPLUS_INCLUDE_PATH=\$CPLUS_INCLUDE_PATH:$HOME/laser_uav_system_ws/install/include" >> ~/.bashrc
+  echo -e "export CPLUS_INCLUDE_PATH=\$CPLUS_INCLUDE_PATH:\$ACADOS_SOURCE_DIR/include" >> ~/.bashrc
  fi
 
 colcon build \
      --symlink-install \
+     --merge-install \
      --cmake-args \
-     -DCMAKE_PREFIX_PATH="/usr/local;/opt/ros/jazzy" \
-     -DPKG_CONFIG_PATH="/usr/local/lib/pkgconfig" \
      -Wno-dev 
 
 source install/setup.bash

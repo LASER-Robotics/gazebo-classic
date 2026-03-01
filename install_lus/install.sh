@@ -51,13 +51,13 @@ if ! grep -q "GAZEBO CLASSIC LOCAL" ~/.bashrc; then
 
 
     source /usr/local/share/gazebo/setup.sh
-    export GAZEBO_RESOURCE_PATH=/usr/local/share/gazebo-11:\$GAZEBO_RESOURCE_PATH
+    export GAZEBO_RESOURCE_PATH=/usr/local/share/gazebo-11:$GAZEBO_RESOURCE_PATH
     export GAZEBO_DIR=/usr/local
-    export CMAKE_PREFIX_PATH=/usr/local:\$CMAKE_PREFIX_PATH
-    export LD_LIBRARY_PATH=/usr/local/lib:\$LD_LIBRARY_PATH
-    export GAZEBO_PLUGIN_PATH=/usr/local/lib:\$GAZEBO_PLUGIN_PATH
-    export GAZEBO_MODEL_PATH=/usr/local/share/gazebo/models:\$GAZEBO_MODEL_PATH
-    export PATH=/usr/local/bin:\$PATH
+    export CMAKE_PREFIX_PATH=/usr/local:$CMAKE_PREFIX_PATH
+    export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+    export GAZEBO_PLUGIN_PATH=/usr/local/lib:$GAZEBO_PLUGIN_PATH
+    export GAZEBO_MODEL_PATH=/usr/local/share/gazebo/models:$GAZEBO_MODEL_PATH
+    export PATH=/usr/local/bin:$PATH
     
     echo -e "\nGAZEBO VARIABLES ADDED!!!\n"
 else
@@ -260,7 +260,7 @@ colcon build \
 
 source install/setup.bash
 
-if ! grep -q "laser_uav_system_ws/install/gazebo_ros/include" ~/.bashrc; then
+if ! grep -q "laser_uav_system_ws/install/include" ~/.bashrc; then
   export CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH:$HOME/laser_uav_system_ws/install/include && 
   echo -e "export CPLUS_INCLUDE_PATH=\$CPLUS_INCLUDE_PATH:$HOME/laser_uav_system_ws/install/include" >> ~/.bashrc
   echo -e "export CPLUS_INCLUDE_PATH=\$CPLUS_INCLUDE_PATH:\$ACADOS_SOURCE_DIR/include" >> ~/.bashrc

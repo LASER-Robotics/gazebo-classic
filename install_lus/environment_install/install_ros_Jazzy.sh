@@ -28,6 +28,7 @@ sudo apt-get install -y \
     python3-colcon-common-extensions \
     git \
     python3-rosdep \
+    python3-pip
 
 # Inicializa rosdep se necessário
 if [ ! -f /etc/ros/rosdep/sources.list.d/20-default.list ]; then

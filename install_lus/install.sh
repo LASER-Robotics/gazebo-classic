@@ -48,7 +48,7 @@ if ! grep -q "GAZEBO CLASSIC LOCAL" ~/.bashrc; then
     echo -e "export GAZEBO_PLUGIN_PATH=/usr/local/lib:\$GAZEBO_PLUGIN_PATH" >> ~/.bashrc
     echo -e "export GAZEBO_MODEL_PATH=/usr/local/share/gazebo/models:\$GAZEBO_MODEL_PATH" >> ~/.bashrc
     echo -e "export PATH=/usr/local/bin:\$PATH" >> ~/.bashrc
-
+    echo 'export QT_QPA_PLATFORM=xcb' >> ~/.bashrc
 
     source /usr/local/share/gazebo/setup.sh
     export GAZEBO_RESOURCE_PATH=/usr/local/share/gazebo-11:$GAZEBO_RESOURCE_PATH
@@ -58,7 +58,8 @@ if ! grep -q "GAZEBO CLASSIC LOCAL" ~/.bashrc; then
     export GAZEBO_PLUGIN_PATH=/usr/local/lib:$GAZEBO_PLUGIN_PATH
     export GAZEBO_MODEL_PATH=/usr/local/share/gazebo/models:$GAZEBO_MODEL_PATH
     export PATH=/usr/local/bin:$PATH
-    
+    export QT_QPA_PLATFORM=xcb
+
     echo -e "\nGAZEBO VARIABLES ADDED!!!\n"
 else
     echo -e "\nGAZEBO VARIABLES ALREADY EXIST!!!\n"

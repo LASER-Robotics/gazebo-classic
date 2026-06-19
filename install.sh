@@ -71,7 +71,7 @@ rm -rf *
 
 cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local
 
-make -j$(nproc)
+make -j4
 sudo make install
 
 cd $GZ_DIR
@@ -90,7 +90,7 @@ rm -rf *
 
 cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local
 
-make -j$(nproc)
+make -j4
 sudo make install
 
 cd $GZ_DIR
@@ -109,7 +109,7 @@ rm -rf *
 
 cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local
 
-make -j$(nproc)
+make -j4
 sudo make install
 
 cd $GZ_DIR
@@ -128,7 +128,7 @@ rm -rf *
 
 cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local
 
-make -j$(nproc)
+make -j4
 sudo make install
 
 cd $GZ_DIR
@@ -147,7 +147,7 @@ rm -rf *
 
 cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local
 
-make -j$(nproc)
+make -j4
 sudo make install
 
 cd $GZ_DIR
@@ -166,7 +166,7 @@ rm -rf *
 
 cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local
 
-make -j$(nproc)
+make -j4
 sudo make install
 
 cd $GZ_DIR
@@ -185,7 +185,7 @@ rm -rf *
 
 cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local
 
-make -j$(nproc)
+make -j4
 sudo make install
 
 cd $GZ_DIR
@@ -204,7 +204,7 @@ rm -rf *
 
 cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local
 
-make -j$(nproc)
+make -j4
 sudo make install
 
 cd $THIS_DIR
@@ -240,7 +240,7 @@ cmake .. \
     -DCMAKE_PREFIX_PATH="/usr/local;/opt/ros/jazzy" \
     -DBUILD_TESTING=OFF
 
-make -j$(nproc)
+make -j4
 
 sudo make install
 

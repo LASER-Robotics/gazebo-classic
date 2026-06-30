@@ -37,32 +37,34 @@ if [ "$REAL_UAV" == $FALSE ]; then
   fi
 fi
 
-if ! grep -q "GAZEBO CLASSIC LOCAL" ~/.bashrc; then
-    echo "" >> ~/.bashrc
-    echo -e "\n# GAZEBO CLASSIC LOCAL" >> ~/.bashrc
-    echo -e "source /usr/local/share/gazebo/setup.sh" >> ~/.bashrc
-    echo -e "export GAZEBO_RESOURCE_PATH=/usr/local/share/gazebo-11:\$GAZEBO_RESOURCE_PATH" >> ~/.bashrc
-    echo -e "export GAZEBO_DIR=/usr/local" >> ~/.bashrc
-    echo -e "export CMAKE_PREFIX_PATH=/usr/local:\$CMAKE_PREFIX_PATH" >> ~/.bashrc
-    echo -e "export LD_LIBRARY_PATH=/usr/local/lib:\$LD_LIBRARY_PATH" >> ~/.bashrc
-    echo -e "export GAZEBO_PLUGIN_PATH=/usr/local/lib:\$GAZEBO_PLUGIN_PATH" >> ~/.bashrc
-    echo -e "export GAZEBO_MODEL_PATH=/usr/local/share/gazebo/models:\$GAZEBO_MODEL_PATH" >> ~/.bashrc
-    echo -e "export PATH=/usr/local/bin:\$PATH" >> ~/.bashrc
-    echo 'export QT_QPA_PLATFORM=xcb' >> ~/.bashrc
+if [ "$REAL_UAV" == $FALSE ]; then
+	if ! grep -q "GAZEBO CLASSIC LOCAL" ~/.bashrc; then
+	    echo "" >> ~/.bashrc
+	    echo -e "\n# GAZEBO CLASSIC LOCAL" >> ~/.bashrc
+	    echo -e "source /usr/local/share/gazebo/setup.sh" >> ~/.bashrc
+	    echo -e "export GAZEBO_RESOURCE_PATH=/usr/local/share/gazebo-11:\$GAZEBO_RESOURCE_PATH" >> ~/.bashrc
+	    echo -e "export GAZEBO_DIR=/usr/local" >> ~/.bashrc
+	    echo -e "export CMAKE_PREFIX_PATH=/usr/local:\$CMAKE_PREFIX_PATH" >> ~/.bashrc
+	    echo -e "export LD_LIBRARY_PATH=/usr/local/lib:\$LD_LIBRARY_PATH" >> ~/.bashrc
+	    echo -e "export GAZEBO_PLUGIN_PATH=/usr/local/lib:\$GAZEBO_PLUGIN_PATH" >> ~/.bashrc
+	    echo -e "export GAZEBO_MODEL_PATH=/usr/local/share/gazebo/models:\$GAZEBO_MODEL_PATH" >> ~/.bashrc
+	    echo -e "export PATH=/usr/local/bin:\$PATH" >> ~/.bashrc
+	    echo 'export QT_QPA_PLATFORM=xcb' >> ~/.bashrc
 
-    source /usr/local/share/gazebo/setup.sh
-    export GAZEBO_RESOURCE_PATH=/usr/local/share/gazebo-11:$GAZEBO_RESOURCE_PATH
-    export GAZEBO_DIR=/usr/local
-    export CMAKE_PREFIX_PATH=/usr/local:$CMAKE_PREFIX_PATH
-    export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
-    export GAZEBO_PLUGIN_PATH=/usr/local/lib:$GAZEBO_PLUGIN_PATH
-    export GAZEBO_MODEL_PATH=/usr/local/share/gazebo/models:$GAZEBO_MODEL_PATH
-    export PATH=/usr/local/bin:$PATH
-    export QT_QPA_PLATFORM=xcb
+	    source /usr/local/share/gazebo/setup.sh
+	    export GAZEBO_RESOURCE_PATH=/usr/local/share/gazebo-11:$GAZEBO_RESOURCE_PATH
+	    export GAZEBO_DIR=/usr/local
+	    export CMAKE_PREFIX_PATH=/usr/local:$CMAKE_PREFIX_PATH
+	    export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+	    export GAZEBO_PLUGIN_PATH=/usr/local/lib:$GAZEBO_PLUGIN_PATH
+	    export GAZEBO_MODEL_PATH=/usr/local/share/gazebo/models:$GAZEBO_MODEL_PATH
+	    export PATH=/usr/local/bin:$PATH
+	    export QT_QPA_PLATFORM=xcb
 
-    echo -e "\nGAZEBO VARIABLES ADDED!!!\n"
-else
-    echo -e "\nGAZEBO VARIABLES ALREADY EXIST!!!\n"
+	    echo -e "\nGAZEBO VARIABLES ADDED!!!\n"
+	else
+	    echo -e "\nGAZEBO VARIABLES ALREADY EXIST!!!\n"
+	fi
 fi
 
  if [ $(grep -c "MAKEFLAGS" ~/.bashrc) -ne 1 ]; then
@@ -188,7 +190,7 @@ if [ "$REAL_UAV" == $TRUE ]; then
   
      if [[ $response =~ ^(y|Y)=$ ]] 
      then
-       ./$BASE_DIR/git/laser_uav_system/environment_install/install_livox_sdk.sh
+       $BASE_DIR/git/laser_uav_system/environment_install/install_livox_sdk.sh
        break
      elif [[ $response =~ ^(n|N)=$ ]] 
      then

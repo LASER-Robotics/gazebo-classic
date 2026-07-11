@@ -2,6 +2,8 @@
 
 set -e
 
+trap 'echo -e "\n\e[1;31m[ERRO] Script abortado na linha $LINENO. Último comando: $BASH_COMMAND\e[0m\n"' ERR
+
 BASE_DIR=~/git/submodules
 GZ_DIR=$BASE_DIR/gazebo_deps
 THIS_DIR=$(pwd)
@@ -64,7 +66,8 @@ echo " Verificando e apagando pastas antigas..."
 echo "IGNITION_CMAKE"
 
 git clone https://github.com/gazebosim/gz-cmake.git -b ign-cmake2 ign-cmake
-mkdir ign-cmake/build
+
+mkdir -p ign-cmake/build
 cd ign-cmake/build
 
 rm -rf *
@@ -83,7 +86,7 @@ cd $GZ_DIR
 echo "IGNITION_MATH"
 
 git clone https://github.com/gazebosim/gz-math.git -b ign-math6 ign-math
-mkdir ign-math/build
+mkdir -p ign-math/build
 cd ign-math/build
 
 rm -rf *
@@ -102,7 +105,7 @@ cd $GZ_DIR
 echo "IGNITION_TOOLS"
 
 git clone https://github.com/gazebosim/gz-tools.git -b ign-tools1 ign-tools
-mkdir ign-tools/build
+mkdir -p ign-tools/build
 cd ign-tools/build
 
 rm -rf *
@@ -121,7 +124,7 @@ cd $GZ_DIR
 echo "IGNITION_COMMON"
 
 git clone https://github.com/gazebosim/gz-common.git -b ign-common3 ign-common
-mkdir ign-common/build
+mkdir -p ign-common/build
 cd ign-common/build
 
 rm -rf *
@@ -140,7 +143,7 @@ cd $GZ_DIR
 echo "IGNITION_MSGS"
 
 git clone https://github.com/gazebosim/gz-msgs.git -b ign-msgs5 ign-msgs
-mkdir ign-msgs/build
+mkdir -p ign-msgs/build
 cd ign-msgs/build
 
 rm -rf *
@@ -159,7 +162,7 @@ cd $GZ_DIR
 echo "GZ-FUEL-TOOLS"
 
 git clone https://github.com/gazebosim/gz-fuel-tools.git -b ign-fuel-tools4
-mkdir gz-fuel-tools/build
+mkdir -p gz-fuel-tools/build
 cd gz-fuel-tools/build
 
 rm -rf *
@@ -178,7 +181,7 @@ cd $GZ_DIR
 echo "IGNITION_TRANSPORT"
 
 git clone https://github.com/gazebosim/gz-transport.git -b ign-transport8 ign-transport
-mkdir ign-transport/build
+mkdir -p ign-transport/build
 cd ign-transport/build
 
 rm -rf *
@@ -197,7 +200,7 @@ cd $GZ_DIR
 echo "SDFORMAT"
 
 git clone https://github.com/gazebosim/sdformat.git -b sdf9 sdformat
-mkdir sdformat/build
+mkdir -p sdformat/build
 cd sdformat/build
 
 rm -rf *
@@ -213,8 +216,6 @@ cd $THIS_DIR
 # GAZEBO CLASSIC
 # =========================================================
 
-set -e
-
 sudo apt remove -y 'ros-jazzy-gazebo*' || true
 sudo apt remove -y 'gazebo*' || true
 
@@ -229,7 +230,12 @@ sudo apt install -y build-essential cmake pkg-config git \
 
 source /opt/ros/jazzy/setup.bash
 
-cd $HOME/git/gazebo-classic
+if [ ! -d "$HOME/git/gazebo-classic" ]; then
+    echo -e "\e[1;31m[ERRO] $HOME/git/gazebo-classic não existe. Esse repositório precisa ser clonado antes de rodar este script (ex: via gitman).\e[0m"
+    exit 1
+fi
+
+cd $HOME/git/laser_uav_system/gazebo-classic
 rm -rf build
 mkdir -p build
 cd build
@@ -249,5 +255,33 @@ sudo ldconfig
 sudo apt install -y ros-jazzy-tinyxml-vendor ros-jazzy-tinyxml2-vendor
 
 source $HOME/.bashrc
+
+if ! grep -q "GAZEBO CLASSIC LOCAL" ~/.bashrc; then
+    echo "" >> ~/.bashrc
+    echo -e "\n# GAZEBO CLASSIC LOCAL" >> ~/.bashrc
+    echo -e "source /usr/local/share/gazebo/setup.sh" >> ~/.bashrc
+    echo -e "export GAZEBO_RESOURCE_PATH=/usr/local/share/gazebo-11:\$GAZEBO_RESOURCE_PATH" >> ~/.bashrc
+    echo -e "export GAZEBO_DIR=/usr/local" >> ~/.bashrc
+    echo -e "export CMAKE_PREFIX_PATH=/usr/local:\$CMAKE_PREFIX_PATH" >> ~/.bashrc
+    echo -e "export LD_LIBRARY_PATH=/usr/local/lib:\$LD_LIBRARY_PATH" >> ~/.bashrc
+    echo -e "export GAZEBO_PLUGIN_PATH=/usr/local/lib:\$GAZEBO_PLUGIN_PATH" >> ~/.bashrc
+    echo -e "export GAZEBO_MODEL_PATH=/usr/local/share/gazebo/models:\$GAZEBO_MODEL_PATH" >> ~/.bashrc
+    echo -e "export PATH=/usr/local/bin:\$PATH" >> ~/.bashrc
+    echo 'export QT_QPA_PLATFORM=xcb' >> ~/.bashrc
+
+    source /usr/local/share/gazebo/setup.sh
+    export GAZEBO_RESOURCE_PATH=/usr/local/share/gazebo-11:$GAZEBO_RESOURCE_PATH
+    export GAZEBO_DIR=/usr/local
+    export CMAKE_PREFIX_PATH=/usr/local:$CMAKE_PREFIX_PATH
+    export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+    export GAZEBO_PLUGIN_PATH=/usr/local/lib:$GAZEBO_PLUGIN_PATH
+    export GAZEBO_MODEL_PATH=/usr/local/share/gazebo/models:$GAZEBO_MODEL_PATH
+    export PATH=/usr/local/bin:$PATH
+    export QT_QPA_PLATFORM=xcb
+
+    echo -e "\nGAZEBO VARIABLES ADDED!!!\n"
+else
+    echo -e "\nGAZEBO VARIABLES ALREADY EXIST!!!\n"
+fi
 
 echo "Finished"

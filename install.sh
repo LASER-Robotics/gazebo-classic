@@ -230,8 +230,8 @@ sudo apt install -y build-essential cmake pkg-config git \
 
 source /opt/ros/jazzy/setup.bash
 
-if [ ! -d "$HOME/git/gazebo-classic" ]; then
-    echo -e "\e[1;31m[ERRO] $HOME/git/gazebo-classic não existe. Esse repositório precisa ser clonado antes de rodar este script (ex: via gitman).\e[0m"
+if [ ! -d "$HOME/git/laser_uav_system/gazebo-classic" ]; then
+    echo -e "\e[1;31m[ERRO] $HOME/git/laser_uav_system/gazebo-classic não existe. Esse repositório precisa ser clonado antes de rodar este script (ex: via gitman).\e[0m"
     exit 1
 fi
 
